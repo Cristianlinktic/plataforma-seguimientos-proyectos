@@ -119,7 +119,12 @@ export function buildDateTicks(range: { start: Date; end: Date }): DateTick[] {
   const stepDays = days > 210 ? 14 : 7;
   const ticks: DateTick[] = [];
 
-  for (let offset = 0; offset <= days; offset += stepDays) {
+  for (let offset = 0; offset < days; offset += stepDays) {
+    // Si falta menos de medio paso para el final, no abrimos una columna nueva:
+    // dejamos que la última columna existente se estire para cubrir la cola.
+    // Si no, esa última marca queda con una columna casi sin ancho y el número
+    // se sale del contenedor.
+    if (ticks.length > 0 && days - offset < stepDays / 2) break;
     const date = addDays(range.start, offset);
     ticks.push({ offsetDays: offset, dayLabel: format(date, "d"), date });
   }
