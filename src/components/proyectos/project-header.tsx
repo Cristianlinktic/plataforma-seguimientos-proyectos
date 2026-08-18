@@ -28,7 +28,6 @@ export function ProjectHeader({ proyectoId, nombre, descripcion, faseActual, fec
           <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
             {nombre}
           </h1>
-          {faseActual && <p className="mt-2 text-sm text-ink-soft">{faseActual}</p>}
           {descripcion && <p className="mt-1 max-w-2xl text-sm text-ink-faint">{descripcion}</p>}
           {fechaCorte && (
             <p className="mt-3 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink-faint">

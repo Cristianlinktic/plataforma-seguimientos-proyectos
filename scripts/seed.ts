@@ -156,7 +156,6 @@ async function seedMateranProject() {
       id: PROYECTO_ID,
       nombre: "MATERAN",
       descripcion: "Creación, expectativa y lanzamiento de marca",
-      faseActual: "Creación, expectativa y lanzamiento de marca",
       fechaCorte: new Date("2026-08-11").toISOString(),
       createdAt: now,
       updatedAt: now,
