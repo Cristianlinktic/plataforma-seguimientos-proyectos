@@ -45,7 +45,7 @@
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --font-display: var(--font-syne);
+  --font-display: var(--font-familjen);
   --font-body: var(--font-jakarta);
   --font-mono: var(--font-jetbrains-mono);
 }

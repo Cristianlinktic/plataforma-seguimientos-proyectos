@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Plus_Jakarta_Sans, Syne } from "next/font/google";
+import { Familjen_Grotesk, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const familjen = Familjen_Grotesk({
+  variable: "--font-familjen",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "variable",
 });
 
 const jakarta = Plus_Jakarta_Sans({
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={`${syne.variable} ${jakarta.variable} ${jetbrainsMono.variable} antialiased`}>
+      <body className={`${familjen.variable} ${jakarta.variable} ${jetbrainsMono.variable} antialiased`}>
         {children}
       </body>
     </html>
