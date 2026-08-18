@@ -14,9 +14,12 @@ export default async function ProyectosPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink">Proyectos</h1>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo">Panel</p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">
+            Proyectos
+          </h1>
           <p className="mt-1 text-sm text-ink-soft">Seguimiento de todos los proyectos en curso.</p>
         </div>
         <Link href="/proyectos/nuevo" className={buttonClassName({ className: "shrink-0" })}>
@@ -26,7 +29,7 @@ export default async function ProyectosPage() {
       </div>
 
       {proyectos.length === 0 ? (
-        <div className="mt-10 rounded-lg border border-dashed border-line-strong bg-surface p-12 text-center">
+        <div className="mt-10 rounded-xl border border-dashed border-line-strong bg-surface p-12 text-center">
           <p className="text-sm text-ink-soft">Todavía no hay proyectos.</p>
           <Link href="/proyectos/nuevo" className="mt-3 inline-block text-sm font-semibold text-indigo hover:underline">
             Crea el primero →
@@ -34,15 +37,20 @@ export default async function ProyectosPage() {
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {proyectos.map((proyecto) => (
-            <ProjectCard
+          {proyectos.map((proyecto, index) => (
+            <div
               key={proyecto.id}
-              id={proyecto.id}
-              nombre={proyecto.nombre}
-              faseActual={proyecto.faseActual}
-              fechaCorte={proyecto.fechaCorte}
-              stats={proyecto.stats}
-            />
+              className="animate-rise-in"
+              style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
+            >
+              <ProjectCard
+                id={proyecto.id}
+                nombre={proyecto.nombre}
+                faseActual={proyecto.faseActual}
+                fechaCorte={proyecto.fechaCorte}
+                stats={proyecto.stats}
+              />
+            </div>
           ))}
         </div>
       )}

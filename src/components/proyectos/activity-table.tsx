@@ -6,7 +6,7 @@ import { es } from "date-fns/locale";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
-import { EstadoBadge, FrenteBadge } from "@/components/ui/badge";
+import { FrenteBadge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   ActivityFormDialog,
@@ -42,6 +42,12 @@ const ESTADOS: { value: EstadoActividad | "TODOS"; label: string }[] = [
   { value: "EN_CURSO", label: "En curso" },
   { value: "CERRADA", label: "Cerrada" },
 ];
+
+const ESTADO_SELECT_CLASS: Record<EstadoActividad, string> = {
+  CERRADA: "bg-moss-soft text-moss",
+  EN_CURSO: "bg-ochre-soft text-ochre",
+  PENDIENTE: "bg-stone-soft text-stone",
+};
 
 export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTableProps) {
   const [frenteFiltro, setFrenteFiltro] = useState("TODOS");
@@ -96,19 +102,19 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
         </Button>
       </div>
 
-      <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-surface">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface shadow-[var(--shadow-md)]">
         <table className="w-full min-w-[860px] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line bg-paper-dim text-left text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
-              <th className="px-3 py-2.5 font-semibold">#</th>
-              <th className="px-3 py-2.5 font-semibold">Actividad</th>
-              <th className="px-3 py-2.5 font-semibold">Frente</th>
-              <th className="px-3 py-2.5 font-semibold">Responsable</th>
-              <th className="px-3 py-2.5 font-semibold">Estado</th>
-              <th className="px-3 py-2.5 font-semibold">Avance</th>
-              <th className="px-3 py-2.5 font-semibold">Fechas</th>
-              <th className="px-3 py-2.5 font-semibold">Días</th>
-              <th className="px-3 py-2.5 font-semibold text-right">Acciones</th>
+              <th className="px-3 py-3 font-semibold">#</th>
+              <th className="px-3 py-3 font-semibold">Actividad</th>
+              <th className="px-3 py-3 font-semibold">Frente</th>
+              <th className="px-3 py-3 font-semibold">Responsable</th>
+              <th className="px-3 py-3 font-semibold">Estado</th>
+              <th className="px-3 py-3 font-semibold">Avance</th>
+              <th className="px-3 py-3 font-semibold">Fechas</th>
+              <th className="px-3 py-3 font-semibold">Días</th>
+              <th className="px-3 py-3 font-semibold text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +124,10 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
               const dias = differenceInCalendarDays(fin, inicio) + 1;
 
               return (
-                <tr key={actividad.id} className="border-b border-line/70 last:border-0 hover:bg-paper-dim/50">
+                <tr
+                  key={actividad.id}
+                  className="border-b border-line/70 transition-colors last:border-0 hover:bg-indigo-soft/40"
+                >
                   <td className="px-3 py-2.5 font-mono text-xs text-ink-faint">
                     {String(actividad.numero).padStart(2, "0")}
                   </td>
@@ -148,21 +157,24 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
                           )
                         )
                       }
-                      className="rounded-md border border-transparent bg-transparent text-xs focus:border-line-strong focus:outline-none"
+                      className={`cursor-pointer appearance-none rounded-full border-0 py-1 pl-2.5 pr-6 text-xs font-semibold transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo disabled:cursor-wait disabled:opacity-60 ${ESTADO_SELECT_CLASS[actividad.estado]}`}
+                      style={{
+                        backgroundImage:
+                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='currentColor' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 8px center",
+                      }}
                     >
                       <option value="PENDIENTE">Pendiente</option>
                       <option value="EN_CURSO">En curso</option>
                       <option value="CERRADA">Cerrada</option>
                     </select>
-                    <div className="mt-1">
-                      <EstadoBadge estado={actividad.estado} />
-                    </div>
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-16 overflow-hidden rounded-full bg-paper-dim">
                         <div
-                          className="h-full rounded-full bg-indigo"
+                          className="h-full rounded-full bg-gradient-to-r from-indigo to-indigo-glow transition-[width] duration-500 ease-out"
                           style={{ width: `${actividad.porcentaje}%` }}
                         />
                       </div>
@@ -181,7 +193,7 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
                         type="button"
                         aria-label={`Editar ${actividad.nombre}`}
                         onClick={() => setFormTarget(actividad)}
-                        className="rounded-md p-1.5 text-ink-faint hover:bg-paper-dim hover:text-ink"
+                        className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-indigo-soft hover:text-indigo"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
@@ -189,7 +201,7 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
                         type="button"
                         aria-label={`Eliminar ${actividad.nombre}`}
                         onClick={() => setDeleteTarget(actividad)}
-                        className="rounded-md p-1.5 text-ink-faint hover:bg-danger-soft hover:text-danger"
+                        className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-danger-soft hover:text-danger"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

@@ -21,31 +21,37 @@ export function ProjectHeader({ proyectoId, nombre, descripcion, faseActual, fec
   const [dialog, setDialog] = useState<"edit" | "frente" | "delete" | null>(null);
 
   return (
-    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-      <div>
-        <h1 className="font-display text-3xl font-semibold text-ink">{nombre}</h1>
-        {faseActual && <p className="mt-1 text-sm text-ink-soft">{faseActual}</p>}
-        {descripcion && <p className="mt-1 max-w-2xl text-sm text-ink-faint">{descripcion}</p>}
-        {fechaCorte && (
-          <p className="mt-2 font-mono text-xs uppercase tracking-wide text-ink-faint">
-            Fecha de corte: {formatDateEs(new Date(fechaCorte), "d 'de' MMMM yyyy")}
-          </p>
-        )}
-      </div>
+    <div className="relative overflow-hidden rounded-xl border border-line bg-gradient-to-br from-surface to-indigo-soft/40 px-6 py-6 sm:px-8 sm:py-7">
+      <div className="relative flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo">Proyecto</p>
+          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            {nombre}
+          </h1>
+          {faseActual && <p className="mt-2 text-sm text-ink-soft">{faseActual}</p>}
+          {descripcion && <p className="mt-1 max-w-2xl text-sm text-ink-faint">{descripcion}</p>}
+          {fechaCorte && (
+            <p className="mt-3 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wide text-ink-faint">
+              <span className="stitch h-px w-6" aria-hidden />
+              Fecha de corte: {formatDateEs(new Date(fechaCorte), "d 'de' MMMM yyyy")}
+            </p>
+          )}
+        </div>
 
-      <div className="flex shrink-0 flex-wrap gap-2">
-        <Button size="sm" variant="secondary" onClick={() => setDialog("frente")}>
-          <Plus className="h-3.5 w-3.5" />
-          Nuevo frente
-        </Button>
-        <Button size="sm" variant="secondary" onClick={() => setDialog("edit")}>
-          <Pencil className="h-3.5 w-3.5" />
-          Editar
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setDialog("delete")} className="text-danger hover:bg-danger-soft">
-          <Trash2 className="h-3.5 w-3.5" />
-          Eliminar
-        </Button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button size="sm" variant="secondary" onClick={() => setDialog("frente")}>
+            <Plus className="h-3.5 w-3.5" />
+            Nuevo frente
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setDialog("edit")}>
+            <Pencil className="h-3.5 w-3.5" />
+            Editar
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setDialog("delete")} className="text-danger hover:bg-danger-soft">
+            <Trash2 className="h-3.5 w-3.5" />
+            Eliminar
+          </Button>
+        </div>
       </div>
 
       {dialog === "edit" && (

@@ -66,7 +66,7 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
   const corteOffset = fechaCorte ? dayOffset(fechaCorte, range.start) : null;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-line bg-surface">
+    <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-[var(--shadow-md)]">
       <div className="grid grid-cols-[minmax(220px,280px)_1fr]">
         {/* Columna de etiquetas */}
         <div className="border-r border-line">
@@ -83,13 +83,16 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
                 className="flex items-center justify-between bg-paper-dim px-4 text-xs font-semibold uppercase tracking-wide text-ink-soft"
                 style={{ height: ROW_HEIGHT }}
               >
-                <span>{row.frente.nombre}</span>
+                <span className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-indigo" aria-hidden />
+                  {row.frente.nombre}
+                </span>
                 <span className="font-mono text-[11px] font-normal text-ink-faint">{row.count}</span>
               </div>
             ) : (
               <div
                 key={row.key}
-                className="flex flex-col justify-center border-b border-line/70 px-4"
+                className="flex flex-col justify-center border-b border-line/70 px-4 transition-colors hover:bg-indigo-soft/40"
                 style={{ height: ROW_HEIGHT }}
               >
                 <span className="truncate text-sm text-ink" title={row.actividad.nombre}>
@@ -130,11 +133,11 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
 
               {corteOffset !== null && corteOffset >= 0 && corteOffset <= days && (
                 <div
-                  className="stitch-indigo absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo"
+                  className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo/70"
                   style={{ left: corteOffset * PX_PER_DAY }}
                   title={`Fecha de corte: ${format(fechaCorte as Date, "d 'de' MMMM yyyy", { locale: es })}`}
                 >
-                  <span className="absolute -top-0 left-1 rounded-b bg-indigo px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper">
+                  <span className="absolute top-1.5 left-1.5 rounded-full bg-indigo px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper shadow-[var(--shadow-sm)]">
                     Corte
                   </span>
                 </div>
@@ -146,7 +149,8 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
                   style={{ left: todayOffset * PX_PER_DAY }}
                   title={`Hoy: ${format(today, "d 'de' MMMM yyyy", { locale: es })}`}
                 >
-                  <span className="absolute -top-0 left-1 rounded-b bg-danger px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper">
+                  <span className="absolute -top-0.5 left-1.5 flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper shadow-[var(--shadow-sm)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-paper animate-pulse-soft" />
                     Hoy
                   </span>
                 </div>
@@ -156,9 +160,13 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
                 row.kind === "group" ? (
                   <div key={row.key} className="bg-paper-dim" style={{ height: ROW_HEIGHT }} />
                 ) : (
-                  <div key={row.key} className="relative border-b border-line/70" style={{ height: ROW_HEIGHT }}>
+                  <div
+                    key={row.key}
+                    className="relative border-b border-line/70 transition-colors hover:bg-indigo-soft/40"
+                    style={{ height: ROW_HEIGHT }}
+                  >
                     <div
-                      className={`absolute top-1/2 h-5 -translate-y-1/2 rounded-sm border border-dashed border-ink/15 ${barColorClass(row.actividad.estado)}`}
+                      className={`absolute top-1/2 h-2.5 -translate-y-1/2 overflow-hidden rounded-full shadow-[var(--shadow-sm)] transition-transform duration-200 hover:scale-y-125 ${barColorClass(row.actividad.estado)}`}
                       style={{
                         left: dayOffset(row.actividad.fechaInicio, range.start) * PX_PER_DAY,
                         width: Math.max(
@@ -166,13 +174,14 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
                             dayOffset(row.actividad.fechaInicio, range.start) +
                             1) *
                             PX_PER_DAY,
-                          6
+                          8
                         ),
                       }}
                       title={`${row.actividad.nombre} · ${ESTADO_LABEL[row.actividad.estado]} · ${row.actividad.porcentaje}% · ${format(row.actividad.fechaInicio, "d MMM", { locale: es })} – ${format(row.actividad.fechaFin, "d MMM", { locale: es })}`}
                     >
+                      <div className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
                       <div
-                        className="h-full rounded-sm bg-ink/25"
+                        className="relative h-full bg-ink/20"
                         style={{ width: `${row.actividad.porcentaje}%` }}
                       />
                     </div>

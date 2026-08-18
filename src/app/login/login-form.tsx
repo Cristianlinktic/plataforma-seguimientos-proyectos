@@ -14,7 +14,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 
       <div>
         <Label htmlFor="email">Correo</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="tu@materan.com" />
+        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="tu@empresa.com" />
       </div>
 
       <div>

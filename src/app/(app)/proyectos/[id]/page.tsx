@@ -39,7 +39,10 @@ export default async function ProyectoDetallePage({
       <ProjectStats stats={proyecto.stats} />
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Línea de tiempo</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-semibold text-ink">Línea de tiempo</h2>
+          <span className="stitch h-px flex-1" aria-hidden />
+        </div>
         <div className="mt-3">
           <GanttChart
             frentes={frentes}
@@ -60,7 +63,10 @@ export default async function ProyectoDetallePage({
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Actividades</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-semibold text-ink">Actividades</h2>
+          <span className="stitch h-px flex-1" aria-hidden />
+        </div>
         <div className="mt-3">
           <ActivityTable
             proyectoId={proyecto.id}
