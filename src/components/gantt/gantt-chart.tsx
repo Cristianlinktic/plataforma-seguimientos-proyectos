@@ -1,15 +1,15 @@
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { CheckCircle2, CircleDashed, Clock3, Layers } from "lucide-react";
 import { todayDateOnly } from "@/lib/dates";
 import {
   PX_PER_DAY,
   ROW_HEIGHT,
-  barColorClass,
   buildMonthTicks,
   buildRows,
-  buildWeekLines,
   computeRange,
   dayOffset,
+  estadoChipStyle,
   totalDays,
   type GanttActividad,
   type GanttFrente,
@@ -29,12 +29,27 @@ const ESTADO_LABEL: Record<GanttActividad["estado"], string> = {
   CERRADA: "Cerrada",
 };
 
+const ESTADO_ICON: Record<GanttActividad["estado"], typeof CheckCircle2> = {
+  CERRADA: CheckCircle2,
+  EN_CURSO: Clock3,
+  PENDIENTE: CircleDashed,
+};
+
+const HEADER_HEIGHT = 52;
+const CHIP_HEIGHT = 30;
+
+const LEGEND: { estado: GanttActividad["estado"]; label: string }[] = [
+  { estado: "CERRADA", label: "Cerrada" },
+  { estado: "EN_CURSO", label: "En curso" },
+  { estado: "PENDIENTE", label: "Pendiente" },
+];
+
 export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps) {
   if (actividades.length === 0) {
     return (
-      <div className="rounded-lg border border-line bg-surface p-10 text-center text-sm text-ink-soft">
-        Todavía no hay actividades para dibujar el Gantt. Agrega la primera actividad para ver la
-        línea de tiempo.
+      <div className="rounded-2xl border border-dashed border-line-strong bg-surface p-10 text-center text-sm text-ink-soft">
+        Todavía no hay actividades para dibujar la línea de tiempo. Agrega la primera actividad
+        para verla aquí.
       </div>
     );
   }
@@ -43,7 +58,6 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
   const days = totalDays(range);
   const width = days * PX_PER_DAY;
   const monthTicks = buildMonthTicks(range);
-  const weekLines = buildWeekLines(range);
 
   const actividadesPorFrente = new Map<string, GanttActividad[]>();
   const sinFrente: GanttActividad[] = [];
@@ -61,38 +75,68 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
 
   const rows = buildRows(frentes, actividadesPorFrente, sinFrente);
 
+  // Una franja de fondo alterna por frente (no por fila) para agrupar visualmente
+  // sin depender de líneas horizontales.
+  const rowBand: boolean[] = [];
+  for (let i = 0, laneIndex = -1; i < rows.length; i++) {
+    if (rows[i].kind === "group") laneIndex += 1;
+    rowBand.push(laneIndex % 2 === 1);
+  }
+
   const today = todayDateOnly();
   const todayOffset = dayOffset(today, range.start);
   const corteOffset = fechaCorte ? dayOffset(fechaCorte, range.start) : null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-[var(--shadow-md)]">
-      <div className="grid grid-cols-[minmax(220px,280px)_1fr]">
+    <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-lg)]">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-line bg-paper-dim/70 px-5 py-3">
+        {LEGEND.map((item) => {
+          const style = estadoChipStyle(item.estado);
+          return (
+            <span key={item.estado} className="flex items-center gap-1.5 text-xs font-medium text-ink-soft">
+              <span className={`h-2 w-2 rounded-full ${style.dot}`} />
+              {item.label}
+            </span>
+          );
+        })}
+        <span className="ml-auto flex items-center gap-4 text-xs font-medium text-ink-faint">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-danger" />
+            Hoy
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-0.5 w-3 rounded-full border-t-2 border-dashed border-indigo" />
+            Fecha de corte
+          </span>
+        </span>
+      </div>
+
+      <div className="grid grid-cols-[minmax(230px,300px)_1fr]">
         {/* Columna de etiquetas */}
         <div className="border-r border-line">
           <div
-            className="flex items-center border-b border-line px-4 text-[11px] font-semibold uppercase tracking-wide text-ink-faint"
-            style={{ height: 56 }}
+            className="flex items-end border-b border-line/70 px-5 pb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-faint"
+            style={{ height: HEADER_HEIGHT }}
           >
-            Frente / Actividad
+            Actividad
           </div>
-          {rows.map((row) =>
+          {rows.map((row, i) =>
             row.kind === "group" ? (
               <div
                 key={row.key}
-                className="flex items-center justify-between bg-paper-dim px-4 text-xs font-semibold uppercase tracking-wide text-ink-soft"
+                className="flex items-center gap-2 bg-paper-dim/80 px-5"
                 style={{ height: ROW_HEIGHT }}
               >
-                <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-indigo" aria-hidden />
-                  {row.frente.nombre}
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-indigo-soft text-indigo">
+                  <Layers className="h-3.5 w-3.5" strokeWidth={2.25} />
                 </span>
-                <span className="font-mono text-[11px] font-normal text-ink-faint">{row.count}</span>
+                <span className="truncate text-sm font-bold text-ink">{row.frente.nombre}</span>
+                <span className="ml-auto shrink-0 font-mono text-[11px] text-ink-faint">{row.count}</span>
               </div>
             ) : (
               <div
                 key={row.key}
-                className="flex flex-col justify-center border-b border-line/70 px-4 transition-colors hover:bg-indigo-soft/40"
+                className={`flex flex-col justify-center px-5 transition-colors hover:bg-indigo-soft/50 ${rowBand[i] ? "bg-paper-dim/40" : ""}`}
                 style={{ height: ROW_HEIGHT }}
               >
                 <span className="truncate text-sm text-ink" title={row.actividad.nombre}>
@@ -110,34 +154,26 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
         {/* Columna de línea de tiempo */}
         <div className="overflow-x-auto">
           <div style={{ width, minWidth: "100%" }}>
-            <div className="relative border-b border-line" style={{ height: 56 }}>
+            <div className="relative border-b border-line/70" style={{ height: HEADER_HEIGHT }}>
               {monthTicks.map((tick) => (
                 <div
                   key={tick.label}
-                  className="absolute top-0 flex h-full items-center border-l border-line px-3 text-xs font-medium capitalize text-ink-soft"
+                  className="absolute top-0 flex h-full flex-col justify-end border-l border-line/70 px-3 pb-3"
                   style={{ left: tick.offsetDays * PX_PER_DAY, width: tick.widthDays * PX_PER_DAY }}
                 >
-                  {tick.label}
+                  <span className="font-display text-sm font-bold capitalize text-ink">{tick.label}</span>
                 </div>
               ))}
             </div>
 
             <div className="relative">
-              {weekLines.map((offset) => (
-                <div
-                  key={offset}
-                  className="absolute top-0 bottom-0 border-l border-line/60"
-                  style={{ left: offset * PX_PER_DAY }}
-                />
-              ))}
-
               {corteOffset !== null && corteOffset >= 0 && corteOffset <= days && (
                 <div
-                  className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo/70"
+                  className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo/60"
                   style={{ left: corteOffset * PX_PER_DAY }}
                   title={`Fecha de corte: ${format(fechaCorte as Date, "d 'de' MMMM yyyy", { locale: es })}`}
                 >
-                  <span className="absolute top-1.5 left-1.5 rounded-full bg-indigo px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper shadow-[var(--shadow-sm)]">
+                  <span className="absolute top-1.5 left-1.5 rounded-full bg-indigo px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
                     Corte
                   </span>
                 </div>
@@ -145,52 +181,80 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
 
               {todayOffset >= 0 && todayOffset <= days && (
                 <div
-                  className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-danger"
+                  className="absolute top-0 bottom-0 z-10 w-0"
                   style={{ left: todayOffset * PX_PER_DAY }}
                   title={`Hoy: ${format(today, "d 'de' MMMM yyyy", { locale: es })}`}
                 >
-                  <span className="absolute -top-0.5 left-1.5 flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-paper shadow-[var(--shadow-sm)]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-paper animate-pulse-soft" />
+                  <div className="absolute inset-y-0 w-3 -translate-x-1/2 bg-danger/10 blur-sm" />
+                  <div className="absolute inset-y-0 border-l-2 border-danger" />
+                  <span className="absolute -top-0.5 left-1.5 flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse-soft" />
                     Hoy
                   </span>
                 </div>
               )}
 
-              {rows.map((row) =>
+              {rows.map((row, i) =>
                 row.kind === "group" ? (
-                  <div key={row.key} className="bg-paper-dim" style={{ height: ROW_HEIGHT }} />
+                  <div key={row.key} className="bg-paper-dim/80" style={{ height: ROW_HEIGHT }} />
                 ) : (
-                  <div
+                  <ActivityChipRow
                     key={row.key}
-                    className="relative border-b border-line/70 transition-colors hover:bg-indigo-soft/40"
-                    style={{ height: ROW_HEIGHT }}
-                  >
-                    <div
-                      className={`absolute top-1/2 h-2.5 -translate-y-1/2 overflow-hidden rounded-full shadow-[var(--shadow-sm)] transition-transform duration-200 hover:scale-y-125 ${barColorClass(row.actividad.estado)}`}
-                      style={{
-                        left: dayOffset(row.actividad.fechaInicio, range.start) * PX_PER_DAY,
-                        width: Math.max(
-                          (dayOffset(row.actividad.fechaFin, range.start) -
-                            dayOffset(row.actividad.fechaInicio, range.start) +
-                            1) *
-                            PX_PER_DAY,
-                          8
-                        ),
-                      }}
-                      title={`${row.actividad.nombre} · ${ESTADO_LABEL[row.actividad.estado]} · ${row.actividad.porcentaje}% · ${format(row.actividad.fechaInicio, "d MMM", { locale: es })} – ${format(row.actividad.fechaFin, "d MMM", { locale: es })}`}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
-                      <div
-                        className="relative h-full bg-ink/20"
-                        style={{ width: `${row.actividad.porcentaje}%` }}
-                      />
-                    </div>
-                  </div>
+                    actividad={row.actividad}
+                    rangeStart={range.start}
+                    band={rowBand[i]}
+                    index={i}
+                  />
                 )
               )}
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ActivityChipRow({
+  actividad,
+  rangeStart,
+  band,
+  index,
+}: {
+  actividad: GanttActividad;
+  rangeStart: Date;
+  band: boolean;
+  index: number;
+}) {
+  const style = estadoChipStyle(actividad.estado);
+  const Icon = ESTADO_ICON[actividad.estado];
+
+  const left = dayOffset(actividad.fechaInicio, rangeStart) * PX_PER_DAY;
+  const chipWidth = Math.max(
+    (dayOffset(actividad.fechaFin, rangeStart) - dayOffset(actividad.fechaInicio, rangeStart) + 1) *
+      PX_PER_DAY -
+      6,
+    CHIP_HEIGHT
+  );
+  const showLabel = chipWidth >= 88;
+
+  return (
+    <div
+      className={`relative transition-colors hover:bg-indigo-soft/50 ${band ? "bg-paper-dim/40" : ""}`}
+      style={{ height: ROW_HEIGHT }}
+    >
+      <div
+        className={`animate-chip-in absolute top-1/2 flex -translate-y-1/2 items-center gap-1.5 overflow-hidden rounded-full border px-2.5 shadow-[var(--shadow-sm)] transition-all duration-200 hover:z-20 hover:scale-[1.04] hover:shadow-[var(--shadow-md)] ${style.bg} ${style.border}`}
+        style={{ left, width: chipWidth, height: CHIP_HEIGHT, animationDelay: `${Math.min(index, 24) * 18}ms` }}
+        title={`${actividad.nombre} · ${ESTADO_LABEL[actividad.estado]} · ${actividad.porcentaje}% · ${format(actividad.fechaInicio, "d MMM", { locale: es })} – ${format(actividad.fechaFin, "d MMM", { locale: es })}`}
+      >
+        <Icon className={`h-3 w-3 shrink-0 ${style.text}`} strokeWidth={2.5} />
+        {showLabel && (
+          <span className={`truncate text-[11px] font-semibold ${style.text}`}>{actividad.nombre}</span>
+        )}
+        <span className="absolute inset-x-0 bottom-0 h-[3px] bg-black/10">
+          <span className={`block h-full ${style.fill}`} style={{ width: `${actividad.porcentaje}%` }} />
+        </span>
       </div>
     </div>
   );

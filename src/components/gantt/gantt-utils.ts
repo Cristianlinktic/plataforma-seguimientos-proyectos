@@ -1,9 +1,9 @@
-import { addDays, differenceInCalendarDays, endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
+import { addDays, differenceInCalendarDays, endOfWeek, format, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import type { EstadoActividad } from "@/types/db";
 
-export const PX_PER_DAY = 26;
-export const ROW_HEIGHT = 44;
+export const PX_PER_DAY = 30;
+export const ROW_HEIGHT = 56;
 
 export type GanttActividad = {
   id: string;
@@ -107,27 +107,20 @@ export function buildMonthTicks(range: { start: Date; end: Date }): MonthTick[] 
   return ticks;
 }
 
-export function buildWeekLines(range: { start: Date; end: Date }): number[] {
-  const lines: number[] = [];
-  const days = totalDays(range);
-
-  for (let i = 0; i <= days; i += 7) {
-    lines.push(i);
-  }
-
-  return lines;
-}
-
-export function isTodayWithinRange(range: { start: Date; end: Date }, today: Date): boolean {
-  return isWithinInterval(today, { start: range.start, end: range.end });
-}
-
-const ESTADO_BAR_CLASS: Record<EstadoActividad, string> = {
-  CERRADA: "bg-moss",
-  EN_CURSO: "bg-ochre",
-  PENDIENTE: "bg-stone",
+export type EstadoChipStyle = {
+  bg: string;
+  border: string;
+  text: string;
+  dot: string;
+  fill: string;
 };
 
-export function barColorClass(estado: EstadoActividad): string {
-  return ESTADO_BAR_CLASS[estado];
+const ESTADO_CHIP_STYLE: Record<EstadoActividad, EstadoChipStyle> = {
+  CERRADA: { bg: "bg-moss-soft", border: "border-moss/40", text: "text-moss", dot: "bg-moss", fill: "bg-moss" },
+  EN_CURSO: { bg: "bg-ochre-soft", border: "border-ochre/40", text: "text-ochre", dot: "bg-ochre", fill: "bg-ochre" },
+  PENDIENTE: { bg: "bg-stone-soft", border: "border-stone/40", text: "text-stone", dot: "bg-stone", fill: "bg-stone" },
+};
+
+export function estadoChipStyle(estado: EstadoActividad): EstadoChipStyle {
+  return ESTADO_CHIP_STYLE[estado];
 }
