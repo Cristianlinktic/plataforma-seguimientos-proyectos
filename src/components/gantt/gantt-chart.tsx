@@ -158,7 +158,7 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
             {monthTicks.map((tick) => (
               <div
                 key={tick.offsetDays}
-                className="absolute top-0 flex h-full flex-col justify-start border-l border-line/70 px-2.5 pt-2"
+                className="absolute top-0 flex h-full flex-col items-center justify-start border-l border-line/70 pt-2 text-center"
                 style={{ left: `${pct(tick.offsetDays)}%`, width: `${pct(tick.widthDays)}%` }}
               >
                 <span className="font-display text-sm font-bold capitalize text-ink">{tick.label}</span>
@@ -167,7 +167,7 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
             {dateTicks.map((tick) => (
               <div
                 key={tick.offsetDays}
-                className="absolute bottom-2 font-mono text-[10px] text-ink-faint"
+                className="absolute bottom-2 -translate-x-1/2 text-center font-mono text-[10px] text-ink-faint"
                 style={{ left: `${pct(tick.offsetDays)}%` }}
               >
                 {tick.dayLabel}
