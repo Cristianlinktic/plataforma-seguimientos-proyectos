@@ -89,8 +89,8 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
   const corteOffset = fechaCorte ? dayOffset(fechaCorte, range.start) : null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-lg)]">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-line bg-paper-dim/70 px-5 py-3">
+    <div className="rounded-2xl border border-line bg-surface shadow-[var(--shadow-lg)]">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-t-2xl border-b border-line bg-paper-dim/70 px-5 py-3">
         {LEGEND.map((item) => {
           const style = estadoChipStyle(item.estado);
           return (
@@ -264,23 +264,55 @@ function ActivityChipRow({
       style={{ height: ROW_HEIGHT }}
     >
       <div
-        className={`animate-chip-in absolute top-1/2 flex -translate-y-1/2 items-center gap-1.5 overflow-hidden rounded-full border px-2.5 shadow-[var(--shadow-sm)] transition-all duration-200 hover:z-20 hover:scale-[1.04] hover:shadow-[var(--shadow-md)] ${style.bg} ${style.border}`}
+        className="group absolute top-1/2 -translate-y-1/2 hover:z-40"
         style={{
           left: `${leftPct}%`,
           width: `${widthPct}%`,
           minWidth: CHIP_HEIGHT,
           height: CHIP_HEIGHT,
-          animationDelay: `${Math.min(index, 24) * 18}ms`,
         }}
-        title={`${actividad.nombre} · ${ESTADO_LABEL[actividad.estado]} · ${actividad.porcentaje}% · ${format(actividad.fechaInicio, "d MMM", { locale: es })} – ${format(actividad.fechaFin, "d MMM", { locale: es })}`}
       >
-        <Icon className={`h-3 w-3 shrink-0 ${style.text}`} strokeWidth={2.5} />
-        {showLabel && (
-          <span className={`truncate text-[11px] font-semibold ${style.text}`}>{actividad.nombre}</span>
-        )}
-        <span className="absolute inset-x-0 bottom-0 h-[3px] bg-black/10">
-          <span className={`block h-full ${style.fill}`} style={{ width: `${actividad.porcentaje}%` }} />
-        </span>
+        <div
+          className={`animate-chip-in flex h-full w-full items-center gap-1.5 overflow-hidden rounded-full border px-2.5 shadow-[var(--shadow-sm)] transition-all duration-200 group-hover:z-20 group-hover:scale-[1.04] group-hover:shadow-[var(--shadow-md)] ${style.bg} ${style.border}`}
+          style={{ animationDelay: `${Math.min(index, 24) * 18}ms` }}
+        >
+          <Icon className={`h-3 w-3 shrink-0 ${style.text}`} strokeWidth={2.5} />
+          {showLabel && (
+            <span className={`truncate text-[11px] font-semibold ${style.text}`}>{actividad.nombre}</span>
+          )}
+          <span className="absolute inset-x-0 bottom-0 h-[3px] bg-black/10">
+            <span className={`block h-full ${style.fill}`} style={{ width: `${actividad.porcentaje}%` }} />
+          </span>
+        </div>
+
+        {/* Tooltip: fuera del recorte del pill para que no se corte, aparece con hover del grupo. */}
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2.5 w-60 -translate-x-1/2 rounded-xl border border-line bg-surface p-3 opacity-0 shadow-[var(--shadow-lg)] transition-opacity duration-150 group-hover:opacity-100">
+          <p className="truncate font-display text-xs font-bold text-ink">{actividad.nombre}</p>
+          <p className="mt-0.5 truncate text-[11px] text-ink-faint">{actividad.responsable}</p>
+
+          <div className="mt-2 flex items-center justify-between">
+            <span className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${style.bg} ${style.text}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+              {ESTADO_LABEL[actividad.estado]}
+            </span>
+            <span className="font-mono text-[11px] font-semibold tabular-nums text-ink-soft">
+              {actividad.porcentaje}%
+            </span>
+          </div>
+
+          <p className="mt-2.5 flex items-center justify-between border-t border-line pt-2 font-mono text-[11px] text-ink-soft">
+            <span>
+              {format(actividad.fechaInicio, "d MMM", { locale: es })}
+              {" → "}
+              {format(actividad.fechaFin, "d MMM", { locale: es })}
+            </span>
+            <span className="text-ink-faint">
+              {durationDays} {durationDays === 1 ? "día" : "días"}
+            </span>
+          </p>
+
+          <div className="absolute top-full left-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rotate-45 border-r border-b border-line bg-surface" />
+        </div>
       </div>
     </div>
   );
