@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const proyecto = await getProyecto(id);
-  return { title: `${proyecto.nombre} · Materan` };
+  return { title: proyecto.nombre };
 }
 
 export default async function ProyectoDetallePage({

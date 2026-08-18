@@ -6,7 +6,7 @@ import { ProjectCard } from "@/components/proyectos/project-card";
 import { buttonClassName } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Proyectos · Materan",
+  title: "Proyectos",
 };
 
 export default async function ProyectosPage() {

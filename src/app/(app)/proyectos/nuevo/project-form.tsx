@@ -16,7 +16,7 @@ export function ProjectForm() {
     <form action={action} className="space-y-5">
       <div>
         <Label htmlFor="nombre">Nombre del proyecto</Label>
-        <Input id="nombre" name="nombre" required placeholder="Ej. MATERAN" />
+        <Input id="nombre" name="nombre" required placeholder="Ej. Lanzamiento colección 2027" />
         <FieldError>{state?.fieldErrors?.nombre}</FieldError>
       </div>
 

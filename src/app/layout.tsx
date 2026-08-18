@@ -20,8 +20,11 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Materan · Seguimientos",
-  description: "Plataforma de seguimiento de proyectos de Materan.",
+  title: {
+    default: "Plataforma de Seguimientos de Proyectos LU",
+    template: "%s · Seguimientos LU",
+  },
+  description: "Plataforma de seguimiento de proyectos.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

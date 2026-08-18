@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { ProjectForm } from "./project-form";
 
 export const metadata: Metadata = {
-  title: "Nuevo proyecto · Materan",
+  title: "Nuevo proyecto",
 };
 
 export default function NuevoProyectoPage() {
