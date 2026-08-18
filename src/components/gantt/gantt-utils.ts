@@ -113,20 +113,27 @@ export type DateTick = { offsetDays: number; dayLabel: string; date: Date };
  * Marcas de fecha bajo la banda de meses. La densidad se adapta a qué tan
  * largo es el rango total: rangos cortos muestran cada semana, rangos muy
  * largos saltan a cada dos semanas para no amontonar los números de día.
+ *
+ * El conteo se reinicia en el día 1 de cada mes (en vez de contar semanas
+ * de forma continua desde el inicio del rango) para que la línea de cada
+ * mes siempre caiga justo al borde de una columna, nunca en medio de un
+ * número.
  */
 export function buildDateTicks(range: { start: Date; end: Date }): DateTick[] {
   const days = totalDays(range);
   const stepDays = days > 210 ? 14 : 7;
   const ticks: DateTick[] = [];
 
-  for (let offset = 0; offset < days; offset += stepDays) {
-    // Si falta menos de medio paso para el final, no abrimos una columna nueva:
-    // dejamos que la última columna existente se estire para cubrir la cola.
-    // Si no, esa última marca queda con una columna casi sin ancho y el número
-    // se sale del contenedor.
-    if (ticks.length > 0 && days - offset < stepDays / 2) break;
-    const date = addDays(range.start, offset);
-    ticks.push({ offsetDays: offset, dayLabel: format(date, "d"), date });
+  for (const month of buildMonthTicks(range)) {
+    for (let d = 0; d < month.widthDays; d += stepDays) {
+      // Igual que al final del rango completo: si al mes le queda menos de
+      // medio paso, no abrimos columna nueva y dejamos que la anterior se
+      // estire hasta el siguiente mes.
+      if (d > 0 && month.widthDays - d < stepDays / 2) break;
+      const offset = month.offsetDays + d;
+      const date = addDays(range.start, offset);
+      ticks.push({ offsetDays: offset, dayLabel: format(date, "d"), date });
+    }
   }
 
   return ticks;
