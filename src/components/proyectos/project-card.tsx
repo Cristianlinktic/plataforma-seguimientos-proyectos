@@ -48,24 +48,27 @@ export function ProjectCard({ id, nombre, faseActual, fechaCorte, stats }: Proje
 
         <div className="relative mt-5 border-t border-line pt-4">
           <div className="flex h-2 w-full overflow-hidden rounded-full bg-paper-dim">
-            {SEGMENTS.map((seg) => {
+            {SEGMENTS.map((seg, i) => {
               const value = stats[seg.key] as number;
               const widthPct = stats.total === 0 ? 0 : (value / stats.total) * 100;
               return (
                 <div
                   key={seg.key}
-                  className={`h-full ${seg.bar} transition-[width] duration-500 ease-out first:rounded-l-full last:rounded-r-full`}
-                  style={{ width: `${widthPct}%` }}
+                  className={`animate-grow-x h-full ${seg.bar} first:rounded-l-full last:rounded-r-full`}
+                  style={{ width: `${widthPct}%`, animationDelay: `${150 + i * 90}ms` }}
                 />
               );
             })}
           </div>
 
-          <dl className="mt-3 flex items-center justify-between">
+          <dl className="mt-3 grid grid-cols-3 gap-2">
             {SEGMENTS.map((seg) => (
-              <div key={seg.key} className="flex items-center gap-1.5">
-                <span className={`h-1.5 w-1.5 rounded-full ${seg.dot}`} />
-                <dd className={`font-mono text-sm font-semibold tabular-nums ${seg.text}`}>
+              <div key={seg.key}>
+                <dt className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${seg.dot}`} />
+                  <span className="truncate">{seg.label}</span>
+                </dt>
+                <dd className={`mt-0.5 font-mono text-sm font-semibold tabular-nums ${seg.text}`}>
                   {stats[seg.key] as number}
                 </dd>
               </div>

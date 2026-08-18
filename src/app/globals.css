@@ -195,6 +195,33 @@ body {
   }
 }
 
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: var(--ring-from);
+  }
+  to {
+    stroke-dashoffset: var(--ring-to);
+  }
+}
+
+.animate-grow-x {
+  transform-origin: left center;
+  animation: grow-x 700ms var(--ease-out-expo) both;
+}
+
+.animate-ring-fill {
+  animation: ring-fill 900ms var(--ease-out-expo) both;
+}
+
 @keyframes pulse-soft {
   0%,
   100% {
