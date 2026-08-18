@@ -3,8 +3,8 @@ import { es } from "date-fns/locale";
 import { CheckCircle2, CircleDashed, Clock3, Layers } from "lucide-react";
 import { todayDateOnly } from "@/lib/dates";
 import {
-  PX_PER_DAY,
   ROW_HEIGHT,
+  buildDateTicks,
   buildMonthTicks,
   buildRows,
   computeRange,
@@ -35,7 +35,7 @@ const ESTADO_ICON: Record<GanttActividad["estado"], typeof CheckCircle2> = {
   PENDIENTE: CircleDashed,
 };
 
-const HEADER_HEIGHT = 52;
+const HEADER_HEIGHT = 64;
 const CHIP_HEIGHT = 30;
 
 const LEGEND: { estado: GanttActividad["estado"]; label: string }[] = [
@@ -56,8 +56,9 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
 
   const range = computeRange(actividades, fechaCorte);
   const days = totalDays(range);
-  const width = days * PX_PER_DAY;
+  const pct = (offsetDays: number) => (offsetDays / days) * 100;
   const monthTicks = buildMonthTicks(range);
+  const dateTicks = buildDateTicks(range);
 
   const actividadesPorFrente = new Map<string, GanttActividad[]>();
   const sinFrente: GanttActividad[] = [];
@@ -111,7 +112,7 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
         </span>
       </div>
 
-      <div className="grid grid-cols-[minmax(230px,300px)_1fr]">
+      <div className="grid grid-cols-[minmax(200px,260px)_1fr]">
         {/* Columna de etiquetas */}
         <div className="border-r border-line">
           <div
@@ -151,63 +152,79 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
           )}
         </div>
 
-        {/* Columna de línea de tiempo */}
-        <div className="overflow-x-auto">
-          <div style={{ width, minWidth: "100%" }}>
-            <div className="relative border-b border-line/70" style={{ height: HEADER_HEIGHT }}>
-              {monthTicks.map((tick) => (
-                <div
-                  key={tick.label}
-                  className="absolute top-0 flex h-full flex-col justify-end border-l border-line/70 px-3 pb-3"
-                  style={{ left: tick.offsetDays * PX_PER_DAY, width: tick.widthDays * PX_PER_DAY }}
-                >
-                  <span className="font-display text-sm font-bold capitalize text-ink">{tick.label}</span>
-                </div>
-              ))}
-            </div>
+        {/* Columna de línea de tiempo: todo en porcentajes, cabe sin scroll horizontal. */}
+        <div className="relative">
+          <div className="relative border-b border-line/70" style={{ height: HEADER_HEIGHT }}>
+            {monthTicks.map((tick) => (
+              <div
+                key={tick.label}
+                className="absolute top-0 flex h-full flex-col justify-start border-l border-line/70 px-2.5 pt-2"
+                style={{ left: `${pct(tick.offsetDays)}%`, width: `${pct(tick.widthDays)}%` }}
+              >
+                <span className="font-display text-sm font-bold capitalize text-ink">{tick.label}</span>
+              </div>
+            ))}
+            {dateTicks.map((tick) => (
+              <div
+                key={tick.offsetDays}
+                className="absolute bottom-2 font-mono text-[10px] text-ink-faint"
+                style={{ left: `${pct(tick.offsetDays)}%` }}
+              >
+                {tick.dayLabel}
+              </div>
+            ))}
+          </div>
 
-            <div className="relative">
-              {corteOffset !== null && corteOffset >= 0 && corteOffset <= days && (
-                <div
-                  className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo/60"
-                  style={{ left: corteOffset * PX_PER_DAY }}
-                  title={`Fecha de corte: ${format(fechaCorte as Date, "d 'de' MMMM yyyy", { locale: es })}`}
-                >
-                  <span className="absolute top-1.5 left-1.5 rounded-full bg-indigo px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
-                    Corte
-                  </span>
-                </div>
-              )}
+          <div className="relative">
+            {dateTicks.map((tick) => (
+              <div
+                key={tick.offsetDays}
+                className="absolute top-0 bottom-0 border-l border-line/50"
+                style={{ left: `${pct(tick.offsetDays)}%` }}
+              />
+            ))}
 
-              {todayOffset >= 0 && todayOffset <= days && (
-                <div
-                  className="absolute top-0 bottom-0 z-10 w-0"
-                  style={{ left: todayOffset * PX_PER_DAY }}
-                  title={`Hoy: ${format(today, "d 'de' MMMM yyyy", { locale: es })}`}
-                >
-                  <div className="absolute inset-y-0 w-3 -translate-x-1/2 bg-danger/10 blur-sm" />
-                  <div className="absolute inset-y-0 border-l-2 border-danger" />
-                  <span className="absolute -top-0.5 left-1.5 flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse-soft" />
-                    Hoy
-                  </span>
-                </div>
-              )}
+            {corteOffset !== null && corteOffset >= 0 && corteOffset <= days && (
+              <div
+                className="absolute top-0 bottom-0 z-10 w-0 border-l-2 border-dashed border-indigo/60"
+                style={{ left: `${pct(corteOffset)}%` }}
+                title={`Fecha de corte: ${format(fechaCorte as Date, "d 'de' MMMM yyyy", { locale: es })}`}
+              >
+                <span className="absolute top-1.5 left-1.5 whitespace-nowrap rounded-full bg-indigo px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
+                  Corte
+                </span>
+              </div>
+            )}
 
-              {rows.map((row, i) =>
-                row.kind === "group" ? (
-                  <div key={row.key} className="bg-paper-dim/80" style={{ height: ROW_HEIGHT }} />
-                ) : (
-                  <ActivityChipRow
-                    key={row.key}
-                    actividad={row.actividad}
-                    rangeStart={range.start}
-                    band={rowBand[i]}
-                    index={i}
-                  />
-                )
-              )}
-            </div>
+            {todayOffset >= 0 && todayOffset <= days && (
+              <div
+                className="absolute top-0 bottom-0 z-10 w-0"
+                style={{ left: `${pct(todayOffset)}%` }}
+                title={`Hoy: ${format(today, "d 'de' MMMM yyyy", { locale: es })}`}
+              >
+                <div className="absolute inset-y-0 w-3 -translate-x-1/2 bg-danger/10 blur-sm" />
+                <div className="absolute inset-y-0 border-l-2 border-danger" />
+                <span className="absolute top-7 left-1.5 flex items-center gap-1 whitespace-nowrap rounded-full bg-danger px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-[var(--shadow-sm)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse-soft" />
+                  Hoy
+                </span>
+              </div>
+            )}
+
+            {rows.map((row, i) =>
+              row.kind === "group" ? (
+                <div key={row.key} className="bg-paper-dim/80" style={{ height: ROW_HEIGHT }} />
+              ) : (
+                <ActivityChipRow
+                  key={row.key}
+                  actividad={row.actividad}
+                  rangeStart={range.start}
+                  totalDaysCount={days}
+                  band={rowBand[i]}
+                  index={i}
+                />
+              )
+            )}
           </div>
         </div>
       </div>
@@ -218,25 +235,25 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
 function ActivityChipRow({
   actividad,
   rangeStart,
+  totalDaysCount,
   band,
   index,
 }: {
   actividad: GanttActividad;
   rangeStart: Date;
+  totalDaysCount: number;
   band: boolean;
   index: number;
 }) {
   const style = estadoChipStyle(actividad.estado);
   const Icon = ESTADO_ICON[actividad.estado];
 
-  const left = dayOffset(actividad.fechaInicio, rangeStart) * PX_PER_DAY;
-  const chipWidth = Math.max(
-    (dayOffset(actividad.fechaFin, rangeStart) - dayOffset(actividad.fechaInicio, rangeStart) + 1) *
-      PX_PER_DAY -
-      6,
-    CHIP_HEIGHT
-  );
-  const showLabel = chipWidth >= 88;
+  const startOffset = dayOffset(actividad.fechaInicio, rangeStart);
+  const endOffset = dayOffset(actividad.fechaFin, rangeStart);
+  const leftPct = (startOffset / totalDaysCount) * 100;
+  const widthPct = ((endOffset - startOffset + 1) / totalDaysCount) * 100;
+  const durationDays = endOffset - startOffset + 1;
+  const showLabel = durationDays >= 6;
 
   return (
     <div
@@ -245,7 +262,13 @@ function ActivityChipRow({
     >
       <div
         className={`animate-chip-in absolute top-1/2 flex -translate-y-1/2 items-center gap-1.5 overflow-hidden rounded-full border px-2.5 shadow-[var(--shadow-sm)] transition-all duration-200 hover:z-20 hover:scale-[1.04] hover:shadow-[var(--shadow-md)] ${style.bg} ${style.border}`}
-        style={{ left, width: chipWidth, height: CHIP_HEIGHT, animationDelay: `${Math.min(index, 24) * 18}ms` }}
+        style={{
+          left: `${leftPct}%`,
+          width: `${widthPct}%`,
+          minWidth: CHIP_HEIGHT,
+          height: CHIP_HEIGHT,
+          animationDelay: `${Math.min(index, 24) * 18}ms`,
+        }}
         title={`${actividad.nombre} · ${ESTADO_LABEL[actividad.estado]} · ${actividad.porcentaje}% · ${format(actividad.fechaInicio, "d MMM", { locale: es })} – ${format(actividad.fechaFin, "d MMM", { locale: es })}`}
       >
         <Icon className={`h-3 w-3 shrink-0 ${style.text}`} strokeWidth={2.5} />

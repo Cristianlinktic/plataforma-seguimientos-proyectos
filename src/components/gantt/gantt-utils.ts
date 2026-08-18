@@ -2,7 +2,6 @@ import { addDays, differenceInCalendarDays, endOfWeek, format, startOfWeek } fro
 import { es } from "date-fns/locale";
 import type { EstadoActividad } from "@/types/db";
 
-export const PX_PER_DAY = 30;
 export const ROW_HEIGHT = 56;
 
 export type GanttActividad = {
@@ -102,6 +101,26 @@ export function buildMonthTicks(range: { start: Date; end: Date }): MonthTick[] 
     });
 
     cursor = nextMonth;
+  }
+
+  return ticks;
+}
+
+export type DateTick = { offsetDays: number; dayLabel: string; date: Date };
+
+/**
+ * Marcas de fecha bajo la banda de meses. La densidad se adapta a qué tan
+ * largo es el rango total: rangos cortos muestran cada semana, rangos muy
+ * largos saltan a cada dos semanas para no amontonar los números de día.
+ */
+export function buildDateTicks(range: { start: Date; end: Date }): DateTick[] {
+  const days = totalDays(range);
+  const stepDays = days > 210 ? 14 : 7;
+  const ticks: DateTick[] = [];
+
+  for (let offset = 0; offset <= days; offset += stepDays) {
+    const date = addDays(range.start, offset);
+    ticks.push({ offsetDays: offset, dayLabel: format(date, "d"), date });
   }
 
   return ticks;
