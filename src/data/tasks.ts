@@ -1,5 +1,6 @@
 import "server-only";
-import { prisma } from "@/lib/prisma";
+import { randomUUID } from "node:crypto";
+import { supabaseAdmin, TABLES } from "@/lib/supabase";
 import { requireSession } from "@/data/session";
 import {
   ActividadSchema,
@@ -7,16 +8,31 @@ import {
   type ActividadInput,
   type FrenteInput,
 } from "@/lib/validations";
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 
 async function assertActividadEnProyecto(actividadId: string, proyectoId: string) {
-  const actividad = await prisma.actividad.findUnique({
-    where: { id: actividadId },
-    select: { proyectoId: true },
-  });
+  const { data, error } = await supabaseAdmin
+    .from(TABLES.actividad)
+    .select("proyectoId")
+    .eq("id", actividadId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
 
-  if (!actividad || actividad.proyectoId !== proyectoId) {
+  if (!data || data.proyectoId !== proyectoId) {
     throw new Error("La actividad no pertenece a este proyecto.");
+  }
+}
+
+async function assertFrenteEnProyecto(frenteId: string, proyectoId: string) {
+  const { data, error } = await supabaseAdmin
+    .from(TABLES.frente)
+    .select("proyectoId")
+    .eq("id", frenteId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+
+  if (!data || data.proyectoId !== proyectoId) {
+    throw new Error("El frente no pertenece a este proyecto.");
   }
 }
 
@@ -24,11 +40,32 @@ export async function crearFrente(proyectoId: string, input: FrenteInput) {
   await requireSession();
   const data = FrenteSchema.parse(input);
 
-  const count = await prisma.frente.count({ where: { proyectoId } });
+  const { count, error: countError } = await supabaseAdmin
+    .from(TABLES.frente)
+    .select("*", { count: "exact", head: true })
+    .eq("proyectoId", proyectoId);
+  if (countError) throw new Error(countError.message);
 
-  return prisma.frente.create({
-    data: { nombre: data.nombre, proyectoId, orden: count },
-  });
+  const { data: frente, error } = await supabaseAdmin
+    .from(TABLES.frente)
+    .insert({ id: randomUUID(), nombre: data.nombre, proyectoId, orden: count ?? 0 })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  return frente;
+}
+
+function actividadToRow(data: ReturnType<typeof ActividadSchema.parse>) {
+  return {
+    nombre: data.nombre,
+    responsable: data.responsable,
+    estado: data.estado,
+    porcentaje: data.porcentaje,
+    fechaInicio: new Date(data.fechaInicio).toISOString(),
+    fechaFin: new Date(data.fechaFin).toISOString(),
+    frenteId: data.frenteId || null,
+  };
 }
 
 export async function crearActividad(proyectoId: string, input: ActividadInput) {
@@ -39,25 +76,32 @@ export async function crearActividad(proyectoId: string, input: ActividadInput) 
     await assertFrenteEnProyecto(data.frenteId, proyectoId);
   }
 
-  const ultima = await prisma.actividad.findFirst({
-    where: { proyectoId },
-    orderBy: { numero: "desc" },
-    select: { numero: true },
-  });
+  const { data: ultima, error: ultimaError } = await supabaseAdmin
+    .from(TABLES.actividad)
+    .select("numero")
+    .eq("proyectoId", proyectoId)
+    .order("numero", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (ultimaError) throw new Error(ultimaError.message);
 
-  return prisma.actividad.create({
-    data: {
+  const now = new Date().toISOString();
+
+  const { data: actividad, error } = await supabaseAdmin
+    .from(TABLES.actividad)
+    .insert({
+      id: randomUUID(),
       numero: (ultima?.numero ?? 0) + 1,
-      nombre: data.nombre,
-      responsable: data.responsable,
-      estado: data.estado,
-      porcentaje: data.porcentaje,
-      fechaInicio: new Date(data.fechaInicio),
-      fechaFin: new Date(data.fechaFin),
+      ...actividadToRow(data),
       proyectoId,
-      frenteId: data.frenteId || null,
-    },
-  });
+      createdAt: now,
+      updatedAt: now,
+    })
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  return actividad;
 }
 
 export async function actualizarActividad(
@@ -73,18 +117,15 @@ export async function actualizarActividad(
     await assertFrenteEnProyecto(data.frenteId, proyectoId);
   }
 
-  return prisma.actividad.update({
-    where: { id: actividadId },
-    data: {
-      nombre: data.nombre,
-      responsable: data.responsable,
-      estado: data.estado,
-      porcentaje: data.porcentaje,
-      fechaInicio: new Date(data.fechaInicio),
-      fechaFin: new Date(data.fechaFin),
-      frenteId: data.frenteId || null,
-    },
-  });
+  const { data: actividad, error } = await supabaseAdmin
+    .from(TABLES.actividad)
+    .update({ ...actividadToRow(data), updatedAt: new Date().toISOString() })
+    .eq("id", actividadId)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  return actividad;
 }
 
 export async function actualizarEstadoActividad(
@@ -95,28 +136,25 @@ export async function actualizarEstadoActividad(
   await requireSession();
   await assertActividadEnProyecto(actividadId, proyectoId);
 
-  return prisma.actividad.update({
-    where: { id: actividadId },
-    data: {
+  const { data: actividad, error } = await supabaseAdmin
+    .from(TABLES.actividad)
+    .update({
       estado,
       ...(estado === "CERRADA" ? { porcentaje: 100 } : {}),
-    },
-  });
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", actividadId)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  return actividad;
 }
 
 export async function eliminarActividad(proyectoId: string, actividadId: string) {
   await requireSession();
   await assertActividadEnProyecto(actividadId, proyectoId);
-  await prisma.actividad.delete({ where: { id: actividadId } });
-}
 
-async function assertFrenteEnProyecto(frenteId: string, proyectoId: string) {
-  const frente = await prisma.frente.findUnique({
-    where: { id: frenteId },
-    select: { proyectoId: true },
-  });
-
-  if (!frente || frente.proyectoId !== proyectoId) {
-    throw new Error("El frente no pertenece a este proyecto.");
-  }
+  const { error } = await supabaseAdmin.from(TABLES.actividad).delete().eq("id", actividadId);
+  if (error) throw new Error(error.message);
 }

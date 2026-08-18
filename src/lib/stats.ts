@@ -1,4 +1,4 @@
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 
 export type ActividadStats = {
   estado: EstadoActividad;

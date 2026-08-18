@@ -1,4 +1,4 @@
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 import { cn } from "@/lib/utils";
 
 const ESTADO_CONFIG: Record<EstadoActividad, { label: string; className: string }> = {

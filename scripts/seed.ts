@@ -1,14 +1,26 @@
 import "dotenv/config";
+import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { createClient } from "@supabase/supabase-js";
 
-const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("Configura DATABASE_URL (o DIRECT_URL) en tu archivo .env antes de sembrar datos.");
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !serviceRoleKey) {
+  throw new Error(
+    "Configura NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en tu archivo .env antes de sembrar datos."
+  );
 }
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+const supabase = createClient(url, serviceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+
+const TABLES = {
+  user: "User_seguimiento",
+  proyecto: "Proyecto_seguimiento",
+  frente: "Frente_seguimiento",
+  actividad: "Actividad_seguimiento",
+} as const;
 
 type EstadoSeed = "PENDIENTE" | "EN_CURSO" | "CERRADA";
 
@@ -108,52 +120,86 @@ async function seedAdminUser() {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.user.upsert({
-    where: { email },
-    update: { name, passwordHash },
-    create: { name, email, passwordHash },
-  });
+  const { data: existing, error: findError } = await supabase
+    .from(TABLES.user)
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (findError) throw new Error(findError.message);
+
+  if (existing) {
+    const { error } = await supabase.from(TABLES.user).update({ name, passwordHash }).eq("id", existing.id);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from(TABLES.user)
+      .insert({ id: randomUUID(), name, email, passwordHash, createdAt: new Date().toISOString() });
+    if (error) throw new Error(error.message);
+  }
 
   console.log(`Usuario administrador listo: ${email}`);
 }
 
 async function seedMateranProject() {
-  const proyecto = await prisma.proyecto.upsert({
-    where: { id: "materan-seed" },
-    update: {},
-    create: {
-      id: "materan-seed",
+  const PROYECTO_ID = "materan-seed";
+  const now = new Date().toISOString();
+
+  const { data: existente, error: findError } = await supabase
+    .from(TABLES.proyecto)
+    .select("id")
+    .eq("id", PROYECTO_ID)
+    .maybeSingle();
+  if (findError) throw new Error(findError.message);
+
+  if (!existente) {
+    const { error } = await supabase.from(TABLES.proyecto).insert({
+      id: PROYECTO_ID,
       nombre: "MATERAN",
       descripcion: "Creación, expectativa y lanzamiento de marca",
       faseActual: "Creación, expectativa y lanzamiento de marca",
-      fechaCorte: new Date("2026-08-11"),
-    },
-  });
+      fechaCorte: new Date("2026-08-11").toISOString(),
+      createdAt: now,
+      updatedAt: now,
+    });
+    if (error) throw new Error(error.message);
+  }
 
-  const existentes = await prisma.actividad.count({ where: { proyectoId: proyecto.id } });
-  if (existentes > 0) {
-    console.log(`El proyecto MATERAN ya tiene ${existentes} actividades: se omite la carga inicial.`);
+  const { count, error: countError } = await supabase
+    .from(TABLES.actividad)
+    .select("*", { count: "exact", head: true })
+    .eq("proyectoId", PROYECTO_ID);
+  if (countError) throw new Error(countError.message);
+
+  if ((count ?? 0) > 0) {
+    console.log(`El proyecto MATERAN ya tiene ${count} actividades: se omite la carga inicial.`);
     return;
   }
 
   for (const [index, frenteSeed] of FRENTES.entries()) {
-    const frente = await prisma.frente.create({
-      data: { nombre: frenteSeed.nombre, orden: index, proyectoId: proyecto.id },
-    });
+    const { data: frente, error: frenteError } = await supabase
+      .from(TABLES.frente)
+      .insert({ id: randomUUID(), nombre: frenteSeed.nombre, orden: index, proyectoId: PROYECTO_ID })
+      .select("id")
+      .single();
+    if (frenteError) throw new Error(frenteError.message);
 
-    await prisma.actividad.createMany({
-      data: frenteSeed.actividades.map((a) => ({
-        numero: a.numero,
-        nombre: a.nombre,
-        responsable: a.responsable,
-        estado: a.estado,
-        porcentaje: a.porcentaje,
-        fechaInicio: new Date(a.inicio),
-        fechaFin: new Date(a.fin),
-        proyectoId: proyecto.id,
-        frenteId: frente.id,
-      })),
-    });
+    const rows = frenteSeed.actividades.map((a) => ({
+      id: randomUUID(),
+      numero: a.numero,
+      nombre: a.nombre,
+      responsable: a.responsable,
+      estado: a.estado,
+      porcentaje: a.porcentaje,
+      fechaInicio: new Date(a.inicio).toISOString(),
+      fechaFin: new Date(a.fin).toISOString(),
+      proyectoId: PROYECTO_ID,
+      frenteId: frente.id,
+      createdAt: now,
+      updatedAt: now,
+    }));
+
+    const { error: actividadesError } = await supabase.from(TABLES.actividad).insert(rows);
+    if (actividadesError) throw new Error(actividadesError.message);
   }
 
   console.log("Proyecto MATERAN sembrado con sus frentes y actividades.");
@@ -164,11 +210,7 @@ async function main() {
   await seedMateranProject();
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

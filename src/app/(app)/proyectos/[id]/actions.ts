@@ -12,7 +12,7 @@ import {
 } from "@/data/tasks";
 import { actualizarProyecto, eliminarProyecto } from "@/data/projects";
 import { ActividadSchema, FrenteSchema, ProyectoSchema } from "@/lib/validations";
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 
 export type ActividadFormState = {
   success?: boolean;

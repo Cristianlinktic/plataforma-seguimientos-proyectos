@@ -9,7 +9,7 @@ import {
   crearActividadAction,
   type ActividadFormState,
 } from "@/app/(app)/proyectos/[id]/actions";
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 
 export type ActividadTarget = {
   id: string;

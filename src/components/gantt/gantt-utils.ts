@@ -1,6 +1,6 @@
 import { addDays, differenceInCalendarDays, endOfWeek, format, isWithinInterval, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
-import type { EstadoActividad } from "@/generated/prisma/enums";
+import type { EstadoActividad } from "@/types/db";
 
 export const PX_PER_DAY = 26;
 export const ROW_HEIGHT = 44;
