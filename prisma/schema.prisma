@@ -7,10 +7,16 @@ datasource db {
   provider = "postgresql"
 }
 
+// Los nombres físicos de tabla/enum llevan el sufijo _seguimiento para no
+// confundirse con otras tablas que puedan existir en el mismo proyecto de
+// Supabase. Los modelos de Prisma (y por tanto el resto del código) siguen
+// llamándose User/Proyecto/Frente/Actividad sin cambios.
 enum EstadoActividad {
   PENDIENTE
   EN_CURSO
   CERRADA
+
+  @@map("EstadoActividad_seguimiento")
 }
 
 model User {
@@ -19,6 +25,8 @@ model User {
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+
+  @@map("User_seguimiento")
 }
 
 model Proyecto {
@@ -31,6 +39,8 @@ model Proyecto {
   updatedAt   DateTime    @updatedAt
   frentes     Frente[]
   actividades Actividad[]
+
+  @@map("Proyecto_seguimiento")
 }
 
 model Frente {
@@ -42,6 +52,7 @@ model Frente {
   actividades Actividad[]
 
   @@unique([proyectoId, nombre])
+  @@map("Frente_seguimiento")
 }
 
 model Actividad {
@@ -64,4 +75,5 @@ model Actividad {
 
   @@index([proyectoId])
   @@index([frenteId])
+  @@map("Actividad_seguimiento")
 }
