@@ -96,7 +96,7 @@ export function buildMonthTicks(range: { start: Date; end: Date }): MonthTick[] 
     const segmentEnd = nextMonth < range.end ? addDays(nextMonth, -1) : range.end;
 
     ticks.push({
-      label: format(monthStart, "MMMM yyyy", { locale: es }),
+      label: format(monthStart, "MMMM", { locale: es }),
       offsetDays: dayOffset(monthStart, range.start),
       widthDays: differenceInCalendarDays(segmentEnd, monthStart) + 1,
     });

@@ -157,7 +157,7 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
           <div className="relative border-b border-line/70" style={{ height: HEADER_HEIGHT }}>
             {monthTicks.map((tick) => (
               <div
-                key={tick.label}
+                key={tick.offsetDays}
                 className="absolute top-0 flex h-full flex-col justify-start border-l border-line/70 px-2.5 pt-2"
                 style={{ left: `${pct(tick.offsetDays)}%`, width: `${pct(tick.widthDays)}%` }}
               >
