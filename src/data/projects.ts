@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import { supabaseAdmin, TABLES } from "@/lib/supabase";
-import { requireSession } from "@/data/session";
+import { requireAdmin, requireSession } from "@/data/session";
 import { ProyectoSchema, type ProyectoInput } from "@/lib/validations";
 import { computeProyectoStats } from "@/lib/stats";
 import { hydrateActividad, hydrateProyecto, type ActividadRow, type ProyectoRow } from "@/types/db";
@@ -78,7 +78,7 @@ export const getProyecto = cache(async (id: string) => {
 });
 
 export async function crearProyecto(input: ProyectoInput) {
-  await requireSession();
+  await requireAdmin();
 
   const data = ProyectoSchema.parse(input);
   const now = new Date().toISOString();
@@ -94,7 +94,7 @@ export async function crearProyecto(input: ProyectoInput) {
 }
 
 export async function actualizarProyecto(id: string, input: ProyectoInput) {
-  await requireSession();
+  await requireAdmin();
 
   const data = ProyectoSchema.parse(input);
 
@@ -106,7 +106,7 @@ export async function actualizarProyecto(id: string, input: ProyectoInput) {
 }
 
 export async function eliminarProyecto(id: string) {
-  await requireSession();
+  await requireAdmin();
   const { error } = await supabaseAdmin.from(TABLES.proyecto).delete().eq("id", id);
   if (error) throw new Error(error.message);
 }

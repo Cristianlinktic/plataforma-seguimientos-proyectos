@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { cache } from "react";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin, TABLES } from "@/lib/supabase";
-import { requireSession } from "@/data/session";
+import { requireAdmin, requireSession } from "@/data/session";
 import { UsuarioSchema, type UsuarioInput } from "@/lib/validations";
 import type { UserRow } from "@/types/db";
 
@@ -12,7 +12,7 @@ export const listUsuarios = cache(async () => {
 
   const { data, error } = await supabaseAdmin
     .from(TABLES.user)
-    .select("id, name, email, createdAt")
+    .select("id, name, email, role, createdAt")
     .order("createdAt", { ascending: true });
   if (error) throw new Error(error.message);
 
@@ -20,7 +20,7 @@ export const listUsuarios = cache(async () => {
 });
 
 export async function crearUsuario(input: UsuarioInput) {
-  await requireSession();
+  await requireAdmin();
 
   const data = UsuarioSchema.parse(input);
 
@@ -39,6 +39,7 @@ export async function crearUsuario(input: UsuarioInput) {
     name: data.name,
     email: data.email,
     passwordHash,
+    role: data.role,
     createdAt: new Date().toISOString(),
   });
   if (error) throw new Error(error.message);

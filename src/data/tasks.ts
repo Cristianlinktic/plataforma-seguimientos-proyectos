@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { supabaseAdmin, TABLES } from "@/lib/supabase";
-import { requireSession } from "@/data/session";
+import { requireAdmin } from "@/data/session";
 import {
   ActividadSchema,
   FrenteSchema,
@@ -37,7 +37,7 @@ async function assertFrenteEnProyecto(frenteId: string, proyectoId: string) {
 }
 
 export async function crearFrente(proyectoId: string, input: FrenteInput) {
-  await requireSession();
+  await requireAdmin();
   const data = FrenteSchema.parse(input);
 
   const { count, error: countError } = await supabaseAdmin
@@ -69,7 +69,7 @@ function actividadToRow(data: ReturnType<typeof ActividadSchema.parse>) {
 }
 
 export async function crearActividad(proyectoId: string, input: ActividadInput) {
-  await requireSession();
+  await requireAdmin();
   const data = ActividadSchema.parse(input);
 
   if (data.frenteId) {
@@ -109,7 +109,7 @@ export async function actualizarActividad(
   actividadId: string,
   input: ActividadInput
 ) {
-  await requireSession();
+  await requireAdmin();
   const data = ActividadSchema.parse(input);
   await assertActividadEnProyecto(actividadId, proyectoId);
 
@@ -133,7 +133,7 @@ export async function actualizarEstadoActividad(
   actividadId: string,
   estado: EstadoActividad
 ) {
-  await requireSession();
+  await requireAdmin();
   await assertActividadEnProyecto(actividadId, proyectoId);
 
   const { data: actividad, error } = await supabaseAdmin
@@ -152,7 +152,7 @@ export async function actualizarEstadoActividad(
 }
 
 export async function eliminarActividad(proyectoId: string, actividadId: string) {
-  await requireSession();
+  await requireAdmin();
   await assertActividadEnProyecto(actividadId, proyectoId);
 
   const { error } = await supabaseAdmin.from(TABLES.actividad).delete().eq("id", actividadId);

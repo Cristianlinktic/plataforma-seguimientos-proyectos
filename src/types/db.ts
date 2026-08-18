@@ -1,11 +1,14 @@
 export type EstadoActividad = "PENDIENTE" | "EN_CURSO" | "CERRADA";
 
+export type RolUsuario = "ADMIN" | "LECTOR";
+
 // Formas de fila tal como las devuelve Postgres/PostgREST (fechas como texto ISO).
 export type UserRow = {
   id: string;
   name: string;
   email: string;
   passwordHash: string;
+  role: RolUsuario;
   createdAt: string;
 };
 

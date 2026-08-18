@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { Modal } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FieldError, Input, Label } from "@/components/ui/field";
+import { FieldError, Input, Label, Select } from "@/components/ui/field";
 import { crearUsuarioAction, type UsuarioFormState } from "@/app/(app)/usuarios/actions";
 
 export function UserFormDialog({ onClose }: { onClose: () => void }) {
@@ -36,6 +36,15 @@ export function UserFormDialog({ onClose }: { onClose: () => void }) {
           <Input id="user-password" name="password" type="password" required minLength={8} />
           <p className="mt-1 text-xs text-ink-faint">Mínimo 8 caracteres.</p>
           <FieldError>{state?.fieldErrors?.password}</FieldError>
+        </div>
+
+        <div>
+          <Label htmlFor="user-role">Rol</Label>
+          <Select id="user-role" name="role" defaultValue="LECTOR">
+            <option value="LECTOR">Lector — solo puede ver</option>
+            <option value="ADMIN">Administrador — puede crear y editar</option>
+          </Select>
+          <FieldError>{state?.fieldErrors?.role}</FieldError>
         </div>
 
         {state?.error && (

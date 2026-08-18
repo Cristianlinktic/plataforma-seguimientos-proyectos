@@ -128,12 +128,15 @@ async function seedAdminUser() {
   if (findError) throw new Error(findError.message);
 
   if (existing) {
-    const { error } = await supabase.from(TABLES.user).update({ name, passwordHash }).eq("id", existing.id);
+    const { error } = await supabase
+      .from(TABLES.user)
+      .update({ name, passwordHash, role: "ADMIN" })
+      .eq("id", existing.id);
     if (error) throw new Error(error.message);
   } else {
     const { error } = await supabase
       .from(TABLES.user)
-      .insert({ id: randomUUID(), name, email, passwordHash, createdAt: new Date().toISOString() });
+      .insert({ id: randomUUID(), name, email, passwordHash, role: "ADMIN", createdAt: new Date().toISOString() });
     if (error) throw new Error(error.message);
   }
 

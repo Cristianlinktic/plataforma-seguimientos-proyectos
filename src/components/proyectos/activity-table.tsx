@@ -6,7 +6,7 @@ import { es } from "date-fns/locale";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/field";
-import { FrenteBadge } from "@/components/ui/badge";
+import { EstadoBadge, FrenteBadge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   ActivityFormDialog,
@@ -34,6 +34,7 @@ type ActivityTableProps = {
   proyectoId: string;
   frentes: { id: string; nombre: string }[];
   actividades: ActividadRow[];
+  isAdmin: boolean;
 };
 
 const ESTADOS: { value: EstadoActividad | "TODOS"; label: string }[] = [
@@ -49,7 +50,7 @@ const ESTADO_SELECT_CLASS: Record<EstadoActividad, string> = {
   PENDIENTE: "bg-stone-soft text-stone",
 };
 
-export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTableProps) {
+export function ActivityTable({ proyectoId, frentes, actividades, isAdmin }: ActivityTableProps) {
   const [frenteFiltro, setFrenteFiltro] = useState("TODOS");
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoActividad | "TODOS">("TODOS");
   const [formTarget, setFormTarget] = useState<"create" | ActividadTarget>(null);
@@ -96,10 +97,12 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
             ))}
           </Select>
         </div>
-        <Button size="sm" onClick={() => setFormTarget("create")}>
-          <Plus className="h-3.5 w-3.5" />
-          Nueva actividad
-        </Button>
+        {isAdmin && (
+          <Button size="sm" onClick={() => setFormTarget("create")}>
+            <Plus className="h-3.5 w-3.5" />
+            Nueva actividad
+          </Button>
+        )}
       </div>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-line bg-surface shadow-[var(--shadow-md)]">
@@ -114,7 +117,7 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
               <th className="px-3 py-3 font-semibold">Avance</th>
               <th className="px-3 py-3 font-semibold">Fechas</th>
               <th className="px-3 py-3 font-semibold">Días</th>
-              <th className="px-3 py-3 font-semibold text-right">Acciones</th>
+              {isAdmin && <th className="px-3 py-3 font-semibold text-right">Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -141,34 +144,40 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
                   </td>
                   <td className="px-3 py-2.5 text-ink-soft">{actividad.responsable}</td>
                   <td className="px-3 py-2.5">
-                    <label className="sr-only" htmlFor={`estado-${actividad.id}`}>
-                      Estado de {actividad.nombre}
-                    </label>
-                    <select
-                      id={`estado-${actividad.id}`}
-                      value={actividad.estado}
-                      disabled={pendingEstadoId}
-                      onChange={(e) =>
-                        startEstadoTransition(() =>
-                          actualizarEstadoActividadAction(
-                            proyectoId,
-                            actividad.id,
-                            e.target.value as EstadoActividad
-                          )
-                        )
-                      }
-                      className={`cursor-pointer appearance-none rounded-full border-0 py-1 pl-2.5 pr-6 text-xs font-semibold transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo disabled:cursor-wait disabled:opacity-60 ${ESTADO_SELECT_CLASS[actividad.estado]}`}
-                      style={{
-                        backgroundImage:
-                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='currentColor' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 8px center",
-                      }}
-                    >
-                      <option value="PENDIENTE">Pendiente</option>
-                      <option value="EN_CURSO">En curso</option>
-                      <option value="CERRADA">Cerrada</option>
-                    </select>
+                    {isAdmin ? (
+                      <>
+                        <label className="sr-only" htmlFor={`estado-${actividad.id}`}>
+                          Estado de {actividad.nombre}
+                        </label>
+                        <select
+                          id={`estado-${actividad.id}`}
+                          value={actividad.estado}
+                          disabled={pendingEstadoId}
+                          onChange={(e) =>
+                            startEstadoTransition(() =>
+                              actualizarEstadoActividadAction(
+                                proyectoId,
+                                actividad.id,
+                                e.target.value as EstadoActividad
+                              )
+                            )
+                          }
+                          className={`cursor-pointer appearance-none rounded-full border-0 py-1 pl-2.5 pr-6 text-xs font-semibold transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo disabled:cursor-wait disabled:opacity-60 ${ESTADO_SELECT_CLASS[actividad.estado]}`}
+                          style={{
+                            backgroundImage:
+                              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5L5 6.5L8 3.5' stroke='currentColor' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 8px center",
+                          }}
+                        >
+                          <option value="PENDIENTE">Pendiente</option>
+                          <option value="EN_CURSO">En curso</option>
+                          <option value="CERRADA">Cerrada</option>
+                        </select>
+                      </>
+                    ) : (
+                      <EstadoBadge estado={actividad.estado} />
+                    )}
                   </td>
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2">
@@ -187,33 +196,35 @@ export function ActivityTable({ proyectoId, frentes, actividades }: ActivityTabl
                     {format(inicio, "d MMM", { locale: es })} – {format(fin, "d MMM", { locale: es })}
                   </td>
                   <td className="px-3 py-2.5 font-mono text-xs text-ink-soft">{dias}</td>
-                  <td className="px-3 py-2.5">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        type="button"
-                        aria-label={`Editar ${actividad.nombre}`}
-                        onClick={() => setFormTarget(actividad)}
-                        className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-indigo-soft hover:text-indigo"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Eliminar ${actividad.nombre}`}
-                        onClick={() => setDeleteTarget(actividad)}
-                        className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-danger-soft hover:text-danger"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </td>
+                  {isAdmin && (
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          aria-label={`Editar ${actividad.nombre}`}
+                          onClick={() => setFormTarget(actividad)}
+                          className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-indigo-soft hover:text-indigo"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Eliminar ${actividad.nombre}`}
+                          onClick={() => setDeleteTarget(actividad)}
+                          className="rounded-md p-1.5 text-ink-faint transition-colors hover:bg-danger-soft hover:text-danger"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               );
             })}
 
             {filtradas.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-10 text-center text-sm text-ink-faint">
+                <td colSpan={isAdmin ? 9 : 8} className="px-3 py-10 text-center text-sm text-ink-faint">
                   Ninguna actividad coincide con los filtros seleccionados.
                 </td>
               </tr>

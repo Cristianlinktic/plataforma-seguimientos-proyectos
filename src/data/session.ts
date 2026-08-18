@@ -21,3 +21,17 @@ export async function requireSession() {
   }
   return user;
 }
+
+/**
+ * Para Server Actions que mutan datos: además de exigir sesión, exige rol
+ * ADMIN. El rol LECTOR puede ver todo pero no crear/editar/eliminar nada —
+ * ver docs/data-security: el chequeo de UI (ocultar botones) no basta,
+ * cada acción debe volver a verificar por su cuenta.
+ */
+export async function requireAdmin() {
+  const user = await requireSession();
+  if (user.role !== "ADMIN") {
+    throw new Error("Necesitas permisos de administrador para hacer esto.");
+  }
+  return user;
+}

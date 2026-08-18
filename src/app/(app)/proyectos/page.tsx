@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FolderKanban, Plus } from "lucide-react";
 import { listProyectos } from "@/data/projects";
+import { getCurrentUser } from "@/data/session";
 import { ProjectCard } from "@/components/proyectos/project-card";
 import { buttonClassName } from "@/components/ui/button";
 
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ProyectosPage() {
-  const proyectos = await listProyectos();
+  const [proyectos, currentUser] = await Promise.all([listProyectos(), getCurrentUser()]);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   return (
     <div>
@@ -26,15 +28,17 @@ export default async function ProyectosPage() {
               : `${proyectos.length} ${proyectos.length === 1 ? "proyecto activo" : "proyectos activos"} en seguimiento.`}
           </p>
         </div>
-        <Link
-          href="/proyectos/nuevo"
-          className={buttonClassName({
-            className: "shrink-0 transition-transform duration-200 hover:-translate-y-0.5",
-          })}
-        >
-          <Plus className="h-4 w-4" />
-          Nuevo proyecto
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/proyectos/nuevo"
+            className={buttonClassName({
+              className: "shrink-0 transition-transform duration-200 hover:-translate-y-0.5",
+            })}
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo proyecto
+          </Link>
+        )}
       </div>
 
       {proyectos.length === 0 ? (
@@ -43,14 +47,18 @@ export default async function ProyectosPage() {
             <FolderKanban className="h-6 w-6" strokeWidth={2} />
           </span>
           <p className="mt-4 text-sm font-medium text-ink">Todavía no hay proyectos.</p>
-          <p className="mt-1 text-sm text-ink-faint">Crea el primero para empezar a hacer seguimiento.</p>
-          <Link
-            href="/proyectos/nuevo"
-            className={buttonClassName({ className: "mt-5 inline-flex" })}
-          >
-            <Plus className="h-4 w-4" />
-            Crear proyecto
-          </Link>
+          <p className="mt-1 text-sm text-ink-faint">
+            {isAdmin ? "Crea el primero para empezar a hacer seguimiento." : "Todavía no hay proyectos para mostrar."}
+          </p>
+          {isAdmin && (
+            <Link
+              href="/proyectos/nuevo"
+              className={buttonClassName({ className: "mt-5 inline-flex" })}
+            >
+              <Plus className="h-4 w-4" />
+              Crear proyecto
+            </Link>
+          )}
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

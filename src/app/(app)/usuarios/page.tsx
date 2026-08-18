@@ -10,8 +10,14 @@ export const metadata: Metadata = {
   title: "Usuarios",
 };
 
+const ROLE_LABEL: Record<string, { label: string; className: string }> = {
+  ADMIN: { label: "Administrador", className: "bg-indigo-soft text-indigo" },
+  LECTOR: { label: "Lector", className: "bg-stone-soft text-stone" },
+};
+
 export default async function UsuariosPage() {
   const [usuarios, currentUser] = await Promise.all([listUsuarios(), getCurrentUser()]);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   return (
     <div>
@@ -25,7 +31,7 @@ export default async function UsuariosPage() {
             Cuentas de acceso de tu equipo a la plataforma.
           </p>
         </div>
-        <NewUserButton />
+        {isAdmin && <NewUserButton />}
       </div>
 
       <Card className="mt-6 overflow-hidden">
@@ -34,30 +40,39 @@ export default async function UsuariosPage() {
             <tr className="border-b border-line bg-paper-dim text-left text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
               <th className="px-4 py-3 font-semibold">Nombre</th>
               <th className="px-4 py-3 font-semibold">Correo</th>
+              <th className="px-4 py-3 font-semibold">Rol</th>
               <th className="px-4 py-3 font-semibold">Desde</th>
             </tr>
           </thead>
           <tbody>
-            {usuarios.map((usuario) => (
-              <tr key={usuario.id} className="border-b border-line/70 last:border-0 hover:bg-indigo-soft/40">
-                <td className="px-4 py-3 text-ink">
-                  {usuario.name}
-                  {usuario.id === currentUser?.id && (
-                    <span className="ml-2 rounded-full bg-indigo-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo">
-                      Tú
+            {usuarios.map((usuario) => {
+              const role = ROLE_LABEL[usuario.role] ?? ROLE_LABEL.LECTOR;
+              return (
+                <tr key={usuario.id} className="border-b border-line/70 last:border-0 hover:bg-indigo-soft/40">
+                  <td className="px-4 py-3 text-ink">
+                    {usuario.name}
+                    {usuario.id === currentUser?.id && (
+                      <span className="ml-2 rounded-full bg-indigo-soft px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo">
+                        Tú
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-ink-soft">{usuario.email}</td>
+                  <td className="px-4 py-3">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${role.className}`}>
+                      {role.label}
                     </span>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-ink-soft">{usuario.email}</td>
-                <td className="px-4 py-3 font-mono text-xs text-ink-faint">
-                  {formatDateEs(new Date(usuario.createdAt), "d MMM yyyy")}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-ink-faint">
+                    {formatDateEs(new Date(usuario.createdAt), "d MMM yyyy")}
+                  </td>
+                </tr>
+              );
+            })}
 
             {usuarios.length === 0 && (
               <tr>
-                <td colSpan={3} className="px-4 py-10 text-center text-sm text-ink-faint">
+                <td colSpan={4} className="px-4 py-10 text-center text-sm text-ink-faint">
                   <Users className="mx-auto mb-2 h-6 w-6" strokeWidth={1.5} />
                   Todavía no hay usuarios.
                 </td>

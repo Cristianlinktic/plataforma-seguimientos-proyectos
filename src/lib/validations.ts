@@ -66,6 +66,8 @@ export const ActividadSchema = z
     path: ["fechaFin"],
   });
 
+export const RolUsuarioEnum = z.enum(["ADMIN", "LECTOR"]);
+
 export const UsuarioSchema = z.object({
   name: z
     .string()
@@ -77,6 +79,7 @@ export const UsuarioSchema = z.object({
     .string()
     .min(8, { error: "La contraseña debe tener al menos 8 caracteres." })
     .max(72, { error: "La contraseña es demasiado larga." }),
+  role: RolUsuarioEnum,
 });
 
 export type ProyectoInput = z.infer<typeof ProyectoSchema>;

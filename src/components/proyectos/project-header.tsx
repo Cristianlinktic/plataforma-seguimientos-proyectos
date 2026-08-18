@@ -15,9 +15,17 @@ type ProjectHeaderProps = {
   descripcion: string | null;
   faseActual: string | null;
   fechaCorte: string | null;
+  isAdmin: boolean;
 };
 
-export function ProjectHeader({ proyectoId, nombre, descripcion, faseActual, fechaCorte }: ProjectHeaderProps) {
+export function ProjectHeader({
+  proyectoId,
+  nombre,
+  descripcion,
+  faseActual,
+  fechaCorte,
+  isAdmin,
+}: ProjectHeaderProps) {
   const [dialog, setDialog] = useState<"edit" | "frente" | "delete" | null>(null);
 
   return (
@@ -37,20 +45,22 @@ export function ProjectHeader({ proyectoId, nombre, descripcion, faseActual, fec
           )}
         </div>
 
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button size="sm" variant="secondary" onClick={() => setDialog("frente")}>
-            <Plus className="h-3.5 w-3.5" />
-            Nuevo frente
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => setDialog("edit")}>
-            <Pencil className="h-3.5 w-3.5" />
-            Editar
-          </Button>
-          <Button size="sm" variant="ghost" onClick={() => setDialog("delete")} className="text-danger hover:bg-danger-soft">
-            <Trash2 className="h-3.5 w-3.5" />
-            Eliminar
-          </Button>
-        </div>
+        {isAdmin && (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setDialog("frente")}>
+              <Plus className="h-3.5 w-3.5" />
+              Nuevo frente
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => setDialog("edit")}>
+              <Pencil className="h-3.5 w-3.5" />
+              Editar
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setDialog("delete")} className="text-danger hover:bg-danger-soft">
+              <Trash2 className="h-3.5 w-3.5" />
+              Eliminar
+            </Button>
+          </div>
+        )}
       </div>
 
       {dialog === "edit" && (

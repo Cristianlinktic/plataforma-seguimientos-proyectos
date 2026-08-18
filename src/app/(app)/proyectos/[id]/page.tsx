@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getProyecto } from "@/data/projects";
+import { getCurrentUser } from "@/data/session";
 import { dateOnly, toDateInputValue } from "@/lib/dates";
 import { ProjectHeader } from "@/components/proyectos/project-header";
 import { ProjectStats } from "@/components/proyectos/project-stats";
@@ -22,7 +23,8 @@ export default async function ProyectoDetallePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const proyecto = await getProyecto(id);
+  const [proyecto, currentUser] = await Promise.all([getProyecto(id), getCurrentUser()]);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const frentes = proyecto.frentes.map((f) => ({ id: f.id, nombre: f.nombre }));
 
@@ -34,6 +36,7 @@ export default async function ProyectoDetallePage({
         descripcion={proyecto.descripcion}
         faseActual={proyecto.faseActual}
         fechaCorte={proyecto.fechaCorte ? toDateInputValue(proyecto.fechaCorte) : null}
+        isAdmin={isAdmin}
       />
 
       <ProjectStats stats={proyecto.stats} />
@@ -71,6 +74,7 @@ export default async function ProyectoDetallePage({
           <ActivityTable
             proyectoId={proyecto.id}
             frentes={frentes}
+            isAdmin={isAdmin}
             actividades={proyecto.actividades.map((a) => ({
               id: a.id,
               numero: a.numero,

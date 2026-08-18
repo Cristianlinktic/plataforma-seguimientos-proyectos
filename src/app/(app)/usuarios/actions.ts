@@ -19,6 +19,7 @@ export async function crearUsuarioAction(
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    role: formData.get("role"),
   });
 
   if (!parsed.success) {
@@ -30,6 +31,9 @@ export async function crearUsuarioAction(
   } catch (error) {
     if (error instanceof Error && error.message === "EMAIL_EN_USO") {
       return { fieldErrors: { email: ["Ya existe un usuario con ese correo."] } };
+    }
+    if (error instanceof Error && error.message.includes("administrador")) {
+      return { error: error.message };
     }
     return { error: "No se pudo crear el usuario." };
   }
