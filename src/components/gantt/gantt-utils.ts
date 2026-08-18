@@ -1,4 +1,4 @@
-import { addDays, differenceInCalendarDays, endOfWeek, format, startOfWeek } from "date-fns";
+import { addDays, differenceInCalendarDays, format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { EstadoActividad } from "@/types/db";
 
@@ -25,6 +25,10 @@ export type GanttRow =
   | { kind: "group"; key: string; frente: GanttFrente; count: number }
   | { kind: "task"; key: string; actividad: GanttActividad };
 
+// El rango es exactamente [fecha mínima, fecha máxima] de las actividades
+// (más la fecha de corte si aplica) — sin redondear a semanas completas, para
+// que los meses mostrados correspondan 1:1 con las fechas reales y no aparezcan
+// meses "fantasma" sin ninguna actividad.
 export function computeRange(
   actividades: GanttActividad[],
   fechaCorte: Date | null
@@ -33,16 +37,13 @@ export function computeRange(
   if (fechaCorte) dates.push(fechaCorte);
   if (dates.length === 0) {
     const today = new Date();
-    return { start: startOfWeek(today, { weekStartsOn: 1 }), end: endOfWeek(addDays(today, 30), { weekStartsOn: 1 }) };
+    return { start: today, end: addDays(today, 30) };
   }
 
   const min = new Date(Math.min(...dates.map((d) => d.getTime())));
   const max = new Date(Math.max(...dates.map((d) => d.getTime())));
 
-  return {
-    start: startOfWeek(min, { weekStartsOn: 1 }),
-    end: endOfWeek(max, { weekStartsOn: 1 }),
-  };
+  return { start: min, end: max };
 }
 
 export function buildRows(
