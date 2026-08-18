@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoActividad {
+  PENDIENTE
+  EN_CURSO
+  CERRADA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Proyecto {
+  id          String      @id @default(cuid())
+  nombre      String
+  descripcion String?
+  faseActual  String?
+  fechaCorte  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  frentes     Frente[]
+  actividades Actividad[]
+}
+
+model Frente {
+  id         String      @id @default(cuid())
+  nombre     String
+  orden      Int         @default(0)
+  proyectoId String
+  proyecto   Proyecto    @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  actividades Actividad[]
+
+  @@unique([proyectoId, nombre])
+}
+
+model Actividad {
+  id          String          @id @default(cuid())
+  numero      Int
+  nombre      String
+  responsable String
+  estado      EstadoActividad @default(PENDIENTE)
+  porcentaje  Int             @default(0)
+  fechaInicio DateTime
+  fechaFin    DateTime
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  proyectoId String
+  proyecto   Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+
+  frenteId String?
+  frente   Frente? @relation(fields: [frenteId], references: [id], onDelete: SetNull)
+
+  @@index([proyectoId])
+  @@index([frenteId])
+}

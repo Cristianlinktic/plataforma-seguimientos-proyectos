@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f5f3ed;
+  --paper-dim: #ede9dd;
+  --surface: #ffffff;
+  --ink: #1b1a1f;
+  --ink-soft: #57534a;
+  --ink-faint: #8a8578;
+  --line: #ddd7c7;
+  --line-strong: #c7bfa9;
+
+  --indigo: #2f3e63;
+  --indigo-ink: #1f2c4a;
+  --indigo-soft: #e9edf5;
+
+  --moss: #3f5c44;
+  --moss-soft: #e4ebe1;
+  --ochre: #97671e;
+  --ochre-soft: #f4e9d2;
+  --stone: #7b7364;
+  --stone-soft: #eae6da;
+
+  --danger: #9c3b30;
+  --danger-soft: #f5e4e0;
+
+  --font-display: var(--font-bricolage);
+  --font-body: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-dim: var(--paper-dim);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-indigo: var(--indigo);
+  --color-indigo-ink: var(--indigo-ink);
+  --color-indigo-soft: var(--indigo-soft);
+
+  --color-moss: var(--moss);
+  --color-moss-soft: var(--moss-soft);
+  --color-ochre: var(--ochre);
+  --color-ochre-soft: var(--ochre-soft);
+  --color-stone: var(--stone);
+  --color-stone-soft: var(--stone-soft);
+
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--indigo);
+  color: var(--paper);
+}
+
+.stitch {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--line-strong) 0,
+    var(--line-strong) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+  background-size: 10px 1px;
+  background-repeat: repeat-x;
+  background-position: left center;
+}
+
+.stitch-indigo {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--indigo) 0,
+    var(--indigo) 5px,
+    transparent 5px,
+    transparent 10px
+  );
+  background-size: 10px 2px;
+  background-repeat: repeat-x;
+  background-position: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
