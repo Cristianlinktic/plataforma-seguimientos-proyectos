@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { FolderKanban, Plus } from "lucide-react";
 import { listProyectos } from "@/data/projects";
 import { ProjectCard } from "@/components/proyectos/project-card";
 import { buttonClassName } from "@/components/ui/button";
@@ -17,22 +17,39 @@ export default async function ProyectosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo">Panel</p>
-          <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-ink">
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink">
             Proyectos
           </h1>
-          <p className="mt-1 text-sm text-ink-soft">Seguimiento de todos los proyectos en curso.</p>
+          <p className="mt-1.5 text-sm text-ink-soft">
+            {proyectos.length === 0
+              ? "Seguimiento de todos los proyectos en curso."
+              : `${proyectos.length} ${proyectos.length === 1 ? "proyecto activo" : "proyectos activos"} en seguimiento.`}
+          </p>
         </div>
-        <Link href="/proyectos/nuevo" className={buttonClassName({ className: "shrink-0" })}>
+        <Link
+          href="/proyectos/nuevo"
+          className={buttonClassName({
+            className: "shrink-0 transition-transform duration-200 hover:-translate-y-0.5",
+          })}
+        >
           <Plus className="h-4 w-4" />
           Nuevo proyecto
         </Link>
       </div>
 
       {proyectos.length === 0 ? (
-        <div className="mt-10 rounded-xl border border-dashed border-line-strong bg-surface p-12 text-center">
-          <p className="text-sm text-ink-soft">Todavía no hay proyectos.</p>
-          <Link href="/proyectos/nuevo" className="mt-3 inline-block text-sm font-semibold text-indigo hover:underline">
-            Crea el primero →
+        <div className="animate-rise-in mt-10 rounded-2xl border border-dashed border-line-strong bg-surface p-14 text-center">
+          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-soft text-indigo">
+            <FolderKanban className="h-6 w-6" strokeWidth={2} />
+          </span>
+          <p className="mt-4 text-sm font-medium text-ink">Todavía no hay proyectos.</p>
+          <p className="mt-1 text-sm text-ink-faint">Crea el primero para empezar a hacer seguimiento.</p>
+          <Link
+            href="/proyectos/nuevo"
+            className={buttonClassName({ className: "mt-5 inline-flex" })}
+          >
+            <Plus className="h-4 w-4" />
+            Crear proyecto
           </Link>
         </div>
       ) : (
