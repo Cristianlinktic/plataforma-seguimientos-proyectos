@@ -164,15 +164,18 @@ export function GanttChart({ frentes, actividades, fechaCorte }: GanttChartProps
                 <span className="font-display text-sm font-bold capitalize text-ink">{tick.label}</span>
               </div>
             ))}
-            {dateTicks.map((tick) => (
-              <div
-                key={tick.offsetDays}
-                className="absolute bottom-2 -translate-x-1/2 text-center font-mono text-[10px] text-ink-faint"
-                style={{ left: `${pct(tick.offsetDays)}%` }}
-              >
-                {tick.dayLabel}
-              </div>
-            ))}
+            {dateTicks.map((tick, i) => {
+              const nextOffset = dateTicks[i + 1]?.offsetDays ?? days;
+              return (
+                <div
+                  key={tick.offsetDays}
+                  className="absolute bottom-0 flex h-5 items-center justify-center border-l border-line/50"
+                  style={{ left: `${pct(tick.offsetDays)}%`, width: `${pct(nextOffset - tick.offsetDays)}%` }}
+                >
+                  <span className="font-mono text-[10px] text-ink-faint">{tick.dayLabel}</span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="relative">
