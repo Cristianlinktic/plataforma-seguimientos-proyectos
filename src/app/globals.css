@@ -222,6 +222,28 @@ body {
   animation: ring-fill 900ms var(--ease-out-expo) both;
 }
 
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-gradient-flow {
+  background-size: 200% 100%;
+  animation: gradient-flow 5s linear infinite;
+}
+
+/* Tailwind envuelve sus utilidades (incluida group-hover:[animation-duration:...])
+   en @layer, y una regla sin capa como esta siempre gana sobre una con capa,
+   sin importar especificidad. Por eso el acelere en hover se escribe acá
+   directamente en vez de como utilidad arbitraria en el JSX. */
+.group:hover .animate-gradient-flow {
+  animation-duration: 1.1s;
+}
+
 @keyframes pulse-soft {
   0%,
   100% {

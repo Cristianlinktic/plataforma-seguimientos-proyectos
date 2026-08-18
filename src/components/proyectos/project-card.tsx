@@ -25,8 +25,9 @@ export function ProjectCard({ id, nombre, faseActual, fechaCorte, stats }: Proje
       <Card
         className="relative h-full overflow-hidden p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.015] hover:border-indigo hover:shadow-[var(--shadow-lg)]"
       >
-        {/* Barra de acento superior: entra deslizando en vez de solo aparecer. */}
-        <div className="absolute inset-x-0 top-0 h-1 -translate-x-full bg-gradient-to-r from-indigo via-thread-ochre-tint to-indigo transition-transform duration-500 ease-out group-hover:translate-x-0" />
+        {/* Barra de acento superior: siempre visible, con degradado en movimiento continuo.
+            En hover no se desliza, sino que crece y el flujo se acelera. */}
+        <div className="animate-gradient-flow absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo via-thread-ochre-tint to-indigo transition-[height] duration-300 ease-out group-hover:h-1.5" />
 
         {/* Resplandor decorativo detrás del anillo, solo visible en hover. */}
         <div
