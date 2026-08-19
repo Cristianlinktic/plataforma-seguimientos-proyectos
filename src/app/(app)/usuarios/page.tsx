@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Users } from "lucide-react";
 import { listUsuarios } from "@/data/users";
 import { getCurrentUser } from "@/data/session";
@@ -16,8 +17,12 @@ const ROLE_LABEL: Record<string, { label: string; className: string }> = {
 };
 
 export default async function UsuariosPage() {
-  const [usuarios, currentUser] = await Promise.all([listUsuarios(), getCurrentUser()]);
-  const isAdmin = currentUser?.role === "ADMIN";
+  const currentUser = await getCurrentUser();
+  if (currentUser?.role !== "ADMIN") {
+    redirect("/proyectos");
+  }
+
+  const usuarios = await listUsuarios();
 
   return (
     <div>
@@ -31,7 +36,7 @@ export default async function UsuariosPage() {
             Cuentas de acceso de tu equipo a la plataforma.
           </p>
         </div>
-        {isAdmin && <NewUserButton />}
+        <NewUserButton />
       </div>
 
       <Card className="mt-6 overflow-hidden">

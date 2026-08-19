@@ -3,12 +3,12 @@ import { randomUUID } from "node:crypto";
 import { cache } from "react";
 import bcrypt from "bcryptjs";
 import { supabaseAdmin, TABLES } from "@/lib/supabase";
-import { requireAdmin, requireSession } from "@/data/session";
+import { requireAdmin } from "@/data/session";
 import { UsuarioSchema, type UsuarioInput } from "@/lib/validations";
 import type { UserRow } from "@/types/db";
 
 export const listUsuarios = cache(async () => {
-  await requireSession();
+  await requireAdmin();
 
   const { data, error } = await supabaseAdmin
     .from(TABLES.user)
