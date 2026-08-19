@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/data/session";
 import { formatDateEs } from "@/lib/dates";
 import { Card } from "@/components/ui/card";
 import { NewUserButton } from "@/components/usuarios/new-user-button";
+import { UserRowActions } from "@/components/usuarios/user-row-actions";
 
 export const metadata: Metadata = {
   title: "Usuarios",
@@ -47,6 +48,7 @@ export default async function UsuariosPage() {
               <th className="px-4 py-3 font-semibold">Correo</th>
               <th className="px-4 py-3 font-semibold">Rol</th>
               <th className="px-4 py-3 font-semibold">Desde</th>
+              <th className="px-4 py-3 font-semibold text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -71,13 +73,16 @@ export default async function UsuariosPage() {
                   <td className="px-4 py-3 font-mono text-xs text-ink-faint">
                     {formatDateEs(new Date(usuario.createdAt), "d MMM yyyy")}
                   </td>
+                  <td className="px-4 py-3">
+                    <UserRowActions usuario={usuario} canDelete={usuario.id !== currentUser?.id} />
+                  </td>
                 </tr>
               );
             })}
 
             {usuarios.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-sm text-ink-faint">
+                <td colSpan={5} className="px-4 py-10 text-center text-sm text-ink-faint">
                   <Users className="mx-auto mb-2 h-6 w-6" strokeWidth={1.5} />
                   Todavía no hay usuarios.
                 </td>
