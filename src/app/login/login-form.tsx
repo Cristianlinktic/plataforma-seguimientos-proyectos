@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/field";
+import { PasswordInput } from "@/components/ui/password-input";
 import { loginAction, type LoginState } from "./actions";
 
 export function LoginForm({ redirectTo }: { redirectTo: string }) {
@@ -19,7 +20,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 
       <div>
         <Label htmlFor="password">Contraseña</Label>
-        <Input id="password" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput id="password" name="password" autoComplete="current-password" required />
       </div>
 
       {state?.error && (

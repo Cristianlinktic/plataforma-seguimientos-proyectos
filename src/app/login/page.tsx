@@ -19,8 +19,8 @@ export default async function LoginPage({
   const { from } = await searchParams;
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
-      <div className="mesh-chrome grain relative hidden flex-col justify-between overflow-hidden px-14 py-12 text-white lg:flex">
+    <div className="mesh-chrome grain relative grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
+      <div className="relative z-10 hidden flex-col justify-between overflow-hidden px-14 py-12 text-white lg:flex">
         <div
           className="animate-float-slow pointer-events-none absolute -right-24 -top-24 h-[26rem] w-[26rem] rounded-full opacity-50 blur-3xl"
           style={{ background: "radial-gradient(closest-side, var(--indigo-glow), transparent)" }}
@@ -55,21 +55,29 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <div className="flex items-center justify-center bg-paper px-6 py-16">
+      <div className="relative z-10 flex items-center justify-center px-6 py-16">
         <div className="animate-rise-in w-full max-w-sm">
           <div className="mb-8 lg:hidden">
-            <span className="font-display text-2xl font-extrabold tracking-tight text-ink">
+            <span className="font-display text-2xl font-extrabold tracking-tight text-white">
               Seguimientos LU
             </span>
           </div>
 
-          <div className="rounded-2xl border border-line bg-surface p-8 shadow-[var(--shadow-lg)]">
-            <h2 className="font-display text-2xl font-bold text-ink">Ingresar</h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              Usa el correo y la contraseña de tu cuenta de equipo.
-            </p>
-            <div className="mt-7">
-              <LoginForm redirectTo={from && from !== "/login" ? from : "/proyectos"} />
+          <div className="relative">
+            <div
+              className="pointer-events-none absolute -inset-5 rounded-[2rem] opacity-60 blur-2xl"
+              style={{ background: "radial-gradient(closest-side, var(--indigo-glow), transparent)" }}
+              aria-hidden
+            />
+            <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-8 shadow-[var(--shadow-lg)]">
+              <div className="animate-gradient-flow absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo via-thread-ochre-tint to-indigo" />
+              <h2 className="font-display text-2xl font-bold text-ink">Ingresar</h2>
+              <p className="mt-1 text-sm text-ink-soft">
+                Usa el correo y la contraseña de tu cuenta de equipo.
+              </p>
+              <div className="mt-7">
+                <LoginForm redirectTo={from && from !== "/login" ? from : "/proyectos"} />
+              </div>
             </div>
           </div>
         </div>
