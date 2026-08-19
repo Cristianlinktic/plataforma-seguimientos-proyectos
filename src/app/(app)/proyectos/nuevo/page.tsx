@@ -16,8 +16,8 @@ export default async function NuevoProyectoPage() {
 
   return (
     <div className="mx-auto max-w-xl">
-      <h1 className="font-display text-2xl font-semibold text-ink">Nuevo proyecto</h1>
-      <p className="mt-1 text-sm text-ink-soft">
+      <h1 className="font-display text-2xl font-semibold text-white">Nuevo proyecto</h1>
+      <p className="mt-1 text-sm text-white/60">
         Crea un proyecto y luego agrega sus frentes y actividades.
       </p>
       <Card className="mt-6 p-6">

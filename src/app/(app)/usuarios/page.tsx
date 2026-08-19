@@ -23,11 +23,11 @@ export default async function UsuariosPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo">Panel</p>
-          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo-glow">Panel</p>
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-white">
             Usuarios
           </h1>
-          <p className="mt-1.5 text-sm text-ink-soft">
+          <p className="mt-1.5 text-sm text-white/60">
             Cuentas de acceso de tu equipo a la plataforma.
           </p>
         </div>

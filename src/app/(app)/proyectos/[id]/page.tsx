@@ -43,8 +43,8 @@ export default async function ProyectoDetallePage({
 
       <section>
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-lg font-semibold text-ink">Línea de tiempo</h2>
-          <span className="stitch h-px flex-1" aria-hidden />
+          <h2 className="font-display text-lg font-semibold text-white">Línea de tiempo</h2>
+          <span className="stitch-light h-px flex-1" aria-hidden />
         </div>
         <div className="mt-3">
           <GanttChart
@@ -67,8 +67,8 @@ export default async function ProyectoDetallePage({
 
       <section>
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-lg font-semibold text-ink">Actividades</h2>
-          <span className="stitch h-px flex-1" aria-hidden />
+          <h2 className="font-display text-lg font-semibold text-white">Actividades</h2>
+          <span className="stitch-light h-px flex-1" aria-hidden />
         </div>
         <div className="mt-3">
           <ActivityTable

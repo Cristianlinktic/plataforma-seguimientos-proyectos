@@ -18,11 +18,11 @@ export default async function ProyectosPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo">Panel</p>
-          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-ink">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-indigo-glow">Panel</p>
+          <h1 className="mt-1 font-display text-4xl font-extrabold tracking-tight text-white">
             Proyectos
           </h1>
-          <p className="mt-1.5 text-sm text-ink-soft">
+          <p className="mt-1.5 text-sm text-white/60">
             {proyectos.length === 0
               ? "Seguimiento de todos los proyectos en curso."
               : `${proyectos.length} ${proyectos.length === 1 ? "proyecto activo" : "proyectos activos"} en seguimiento.`}
