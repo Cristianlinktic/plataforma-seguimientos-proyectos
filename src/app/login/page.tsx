@@ -19,8 +19,8 @@ export default async function LoginPage({
   const { from } = await searchParams;
 
   return (
-    <div className="mesh-chrome grain relative grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
-      <div className="relative z-10 hidden flex-col justify-between overflow-hidden px-14 py-12 text-white lg:flex">
+    <div className="mesh-chrome grain relative grid min-h-dvh overflow-hidden lg:grid-cols-[1.15fr_1fr]">
+      <div className="relative z-10 hidden flex-col justify-between px-14 py-12 text-white lg:flex">
         <div
           className="animate-float-slow pointer-events-none absolute -right-24 -top-24 h-[26rem] w-[26rem] rounded-full opacity-50 blur-3xl"
           style={{ background: "radial-gradient(closest-side, var(--indigo-glow), transparent)" }}
